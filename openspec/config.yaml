@@ -1,0 +1,72 @@
+schema: spec-driven
+
+context: |
+  Stack: pnpm 11 workspace (api, web), Node 22, Docker Compose (mongo, api, web).
+  api: NestJS 12 (ESM, relative imports end in .js), Mongoose 9 via @nestjs/mongoose,
+    MongoDB 8, @nestjs/swagger (docs at /docs, CLI plugin infers DTOs), Vitest 4, oxlint.
+  web: React 19, Vite 8, TypeScript 6, Tailwind CSS 4 (utility classes only, no CSS
+    files), Vitest 4 with Testing Library and jsdom, oxlint.
+  Architecture: pnpm monorepo, NestJS REST API + React SPA, MongoDB persistence.
+    Support ticket domain (requesters create tickets, agents work them, audit
+    history of every change) is not implemented yet — both apps are framework
+    scaffolds.
+  Testing: Vitest unit specs colocated with code (*.spec.ts / *.test.tsx); api e2e
+    specs in test/*.e2e-spec.ts require MongoDB running.
+  Style: Conventional Commits; English code/identifiers/comments; build only what
+    the task needs.
+
+strict_tdd: true
+
+testing:
+  test_runner:
+    command: "pnpm run check"
+    framework: "Vitest 4 (also runs on the husky pre-commit hook)"
+  layers:
+    unit:
+      available: true
+      tool: "Vitest — api: **/*.spec.ts, web: **/*.test.tsx"
+    integration:
+      available: true
+      tool: "web: @testing-library/react + jsdom"
+    e2e:
+      available: true
+      tool: "api: Vitest, test/*.e2e-spec.ts (needs MongoDB running), run via `pnpm -C api test:e2e`"
+  coverage:
+    available: true
+    command: "pnpm -C api test:cov"
+    note: "api only — @vitest/coverage-v8 is not installed in web"
+  quality:
+    linter:
+      available: true
+      command: "pnpm -r lint (oxlint; api uses --type-aware)"
+    type_checker:
+      available: true
+      command: "web: tsc -b (via pnpm -C web build); api: nest build"
+    formatter:
+      available: true
+      command: "pnpm -C api format (prettier; web has no formatter script)"
+
+rules:
+  proposal:
+    - Build only what the scope needs; state discarded options and why.
+  specs:
+    - Use Given/When/Then scenarios with RFC 2119 keywords (MUST, SHALL, SHOULD, MAY).
+    - Every scenario has a unique, descriptive title; a test with the same name must exist.
+  design:
+    - Document decisions with rationale and tradeoffs.
+    - The MongoDB data model belongs here.
+  tasks:
+    - Group by phase, use hierarchical numbering.
+    - Keep each task completable in one session.
+    - Keep tests next to the code they verify.
+  apply:
+    guidelines:
+      - Follow existing patterns and AGENTS.md.
+    tdd: true
+    test_command: "pnpm run check"
+  verify:
+    test_command: "pnpm run check"
+    build_command: "pnpm -r build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas.
