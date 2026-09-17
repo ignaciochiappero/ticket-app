@@ -47,13 +47,25 @@ API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/do
 | Lint and unit tests (also runs on pre-commit) | `pnpm run check` |
 | API e2e tests (needs MongoDB) | `pnpm -C api test:e2e` |
 
+## API structure
+
+- `api/src/` is organized by feature (`users/`, `categories/`, `tickets/`, `dashboard/`), not by technical layer. Cross-cutting concerns get their own folder: `auth/` owns login, password hashing and the token guard, and is the only place to change for SSO.
+- Inside a feature, one responsibility per file, named by suffix: `*.schema.ts` (MongoDB), `*.service.ts` (business rules and queries), `*.controller.ts` (HTTP routes), `*.seed.ts` (startup data owned by the feature), `*.module.ts` (Nest wiring), `*.spec.ts` (unit tests).
+- DTOs (the API contract) live in the feature's `dto/` folder, one class per file: `dto/category.dto.ts`, `dto/save-category.dto.ts`. Design every feature as one that will grow.
+
+## API conventions
+
+- `POST /auth/login` returns `{ token }`, a signed JWT with the user's id and role and nothing else. Clients send it as `Authorization: Bearer <token>`, and ask `GET /auth/me` for the name and role instead of decoding it. `AuthGuard` is global, so routes are protected by default: opt out with `@Public()`, restrict roles with `@Roles()`, read the user with `@CurrentUser()`, and declare `@ApiBearerAuth()` on guarded controllers. There is no session state and no logout endpoint: logging out is the client discarding its token.
+- Ownership checks (for example, "this ticket belongs to you") live in services, because they need the resource.
+- E2E tests boot the app with `test/create-test-app.ts`, which gives each test file its own database and drops it on close. Get a logged-in client with `loginAs(app, username)` from `test/auth.ts`.
+
 ## Rules
 
 - Build only what the task needs. Do not add dependencies, layers or features without a stated reason.
 - Every behavior change ships with Vitest tests. Run lint and tests before committing.
 - Commits follow Conventional Commits.
 - Code, identifiers and comments are in English.
-- Every API endpoint must show up correctly in Swagger. The Swagger CLI plugin infers DTOs; add decorators only for what it cannot infer.
+- Document every endpoint for someone testing it from `/docs`. The Swagger CLI plugin runs with `introspectComments`, so write a JSDoc summary on each route and a JSDoc description plus `@example` on each DTO property. Add `@ApiTags` per controller, `@ApiParam` (description and example) for path parameters, and `@Api*Response` decorators for error codes.
 - pnpm blocks dependency build scripts. When a new dependency needs one, allow or deny it explicitly with `allowBuilds` in that project's `pnpm-workspace.yaml`.
 - Style the web app with Tailwind utility classes. Do not add CSS files.
 
