@@ -2,6 +2,8 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
+    "start": "docker compose up --build",
+    "stop": "docker compose down",
     "dev": "docker compose up -d mongo && pnpm -r --parallel dev",
     "check": "pnpm run format:check && pnpm -r lint && pnpm -r test",
     "format": "prettier --write .",
