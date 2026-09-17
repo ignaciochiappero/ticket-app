@@ -6,5 +6,21 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  api:
+    build: ./api
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/tickets
+    depends_on:
+      - mongo
+
+  web:
+    build: ./web
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
 volumes:
   mongo-data:
