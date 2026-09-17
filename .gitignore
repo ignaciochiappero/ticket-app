@@ -4,3 +4,4 @@ coverage
 .env
 *.tsbuildinfo
 .claude/skills
+.atl

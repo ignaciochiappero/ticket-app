@@ -1,0 +1,14 @@
+protected_branches="main"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  branch="${remote_ref#refs/heads/}"
+  for protected in $protected_branches; do
+    if [ "$branch" = "$protected" ]; then
+      printf '\033[31m❌ PUSH BLOCKED: direct pushes to "%s" are not allowed.\n' "$branch"
+      printf '  Push a feature branch and open a pull request instead.\033[0m\n'
+      exit 1
+    fi
+  done
+done
+
+exit 0

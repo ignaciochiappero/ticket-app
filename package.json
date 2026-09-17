@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "dev": "docker compose up -d mongo && pnpm -r --parallel dev",
+    "check": "pnpm -r lint && pnpm -r test"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
