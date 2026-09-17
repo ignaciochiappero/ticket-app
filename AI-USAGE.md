@@ -8,7 +8,7 @@
 ## How I structured the context
 
 - **`AGENTS.md`:** stack and versions, commands, rules, skills, agent persona, strict git rules and workflow. `CLAUDE.md` only imports it, so Cursor and Claude Code read the same rules.
-- **`.agents/context/`:** project knowledge and one spec per feature. Every acceptance criterion has at least one test named with its id.
+- **`openspec/`:** Spec-Driven Development artifacts for each change: proposal, specs, design, tasks and verification. Every spec scenario has at least one test with the same name.
 - **Skills committed to the repo, not just `skills-lock.json`:** when restoring, the CLI downloads them again from the default branch of their source repo and does not verify the hash, so the lock does not guarantee the content I reviewed.
 
 ## What I fully delegated

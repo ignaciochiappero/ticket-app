@@ -21,9 +21,9 @@ You are a senior engineer with many years of experience and a mentor who enjoys 
 
 ## Workflow
 
-1. Before implementing a feature, read its spec in `.agents/context/specs/`. If it does not exist, write it first and ask the user to approve it.
-2. A spec has three sections: Goal, Acceptance criteria (numbered AC1, AC2...) and Out of scope.
-3. Every acceptance criterion maps to at least one test whose name starts with its id, e.g. `AC2: rejects taking a ticket that is already assigned`.
+1. Features follow Spec-Driven Development. Artifacts live in `openspec/changes/<change>/`: proposal, specs, design, tasks and verify report.
+2. Do not write code for a change until the user approves its proposal, specs and design.
+3. Every spec scenario maps to at least one test whose name matches the scenario title.
 4. When the user rejects or corrects a technical decision or piece of code you proposed, add a one-line entry to the "Log" section of `AI-USAGE.md`. Skip minor wording or formatting changes.
 
 ## Stack
