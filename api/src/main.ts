@@ -11,8 +11,17 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Ticket App API')
+    .setDescription(
+      'Support ticket system. To try it: list the users with GET /users, click Authorize and enter one of their ids (requester-1 to requester-4, or agent-1 to agent-4). Every request then runs as that user.',
+    )
     .addApiKey(
-      { type: 'apiKey', in: 'header', name: 'X-User-Id' },
+      {
+        type: 'apiKey',
+        in: 'header',
+        name: 'X-User-Id',
+        description:
+          'Id of the acting user: requester-1 to requester-4, or agent-1 to agent-4.',
+      },
       'acting-user',
     )
     .build();

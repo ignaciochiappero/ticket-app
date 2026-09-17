@@ -4,7 +4,7 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import type { UserDto } from '../users/user.dto.js';
+import type { UserDto } from '../users/dto/user.dto.js';
 import type { UserRole } from '../users/user.schema.js';
 
 export const IS_PUBLIC_KEY = 'isPublic';

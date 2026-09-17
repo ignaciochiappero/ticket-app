@@ -161,7 +161,7 @@ DashboardDto     { counts: { open; in_progress; resolved };
                    activeTickets: { id; title; state; assigneeId; timeInStateMs }[] }
 ```
 
-Swagger: DTO classes live in `*.dto.ts`, so the CLI plugin documents them (string-literal unions become enums, class-validator limits are shimmed). Controllers declare return types. Transitions use `@HttpCode(200)` and deletes `@HttpCode(204)`. Non-2xx responses use `@Api*Response` decorators because the plugin cannot infer thrown exceptions. Small `to*Dto` mappers turn `_id` into `id` and never expose `deletedAt`.
+Swagger: DTO classes live in each feature's `dto/` folder, one class per `*.dto.ts` file, so the CLI plugin documents them (string-literal unions become enums, class-validator limits are shimmed). The plugin runs with `introspectComments`: JSDoc on DTO properties becomes descriptions and `@example` values, JSDoc on routes becomes operation summaries. Controllers add `@ApiTags`, and `@ApiParam` with a description and example for path ids. Controllers declare return types. Transitions use `@HttpCode(200)` and deletes `@HttpCode(204)`. Non-2xx responses use `@Api*Response` decorators because the plugin cannot infer thrown exceptions. Small `to*Dto` mappers turn `_id` into `id` and never expose `deletedAt`.
 
 ## 6. Dashboard Computation
 
@@ -223,10 +223,10 @@ Each spec scenario title becomes an identical `it()` name in the layer that owns
 | `api/src/app.module.ts` | Modify | `forRootAsync`, `APP_PIPE`, feature modules |
 | `api/src/app.controller.ts`, `app.service.ts`, `app.controller.spec.ts`, `api/test/app.e2e-spec.ts` | Delete | Hello-world scaffold; Swagger lists only product endpoints |
 | `api/src/auth/` `acting-user.guard` (+ `.spec`), `acting-user.decorators`, `auth.module` (`.ts`) | Create | Acting user |
-| `api/src/users/` `user.schema`, `user.dto`, `users.controller`, `users.service`, `users.seed`, `users.module` (`.ts`) | Create | Users and seed |
-| `api/src/categories/` `category.schema`, `category.dto`, `categories.controller`, `categories.service`, `categories.seed`, `categories.module` (`.ts`) | Create | Back office, lock, seed |
-| `api/src/tickets/` `ticket.schema`, `ticket.dto`, `tickets.controller`, `tickets.service`, `tickets.module`, `ticket-rules` (+ `.spec`) (`.ts`) | Create | Lifecycle, history, comments |
-| `api/src/dashboard/` `dashboard.dto`, `dashboard.controller`, `dashboard.service` (+ `.spec`), `dashboard.module` (`.ts`) | Create | Metrics |
+| `api/src/users/` `user.schema`, `dto/user.dto`, `users.controller`, `users.service`, `users.seed`, `users.module` (`.ts`) | Create | Users and seed |
+| `api/src/categories/` `category.schema`, `dto/category.dto`, `dto/save-category.dto`, `categories.controller`, `categories.service`, `categories.seed`, `categories.module` (`.ts`) | Create | Back office, lock, seed |
+| `api/src/tickets/` `ticket.schema`, `dto/` (one file per DTO: ticket, ticket-summary, history-event, create-ticket, update-ticket, create-comment), `tickets.controller`, `tickets.service`, `tickets.module`, `ticket-rules` (+ `.spec`) (`.ts`) | Create | Lifecycle, history, comments |
+| `api/src/dashboard/` `dto/dashboard.dto`, `dashboard.controller`, `dashboard.service` (+ `.spec`), `dashboard.module` (`.ts`) | Create | Metrics |
 | `api/test/create-test-app.ts`; `user-access`, `ticket-categories`, `ticket-lifecycle`, `ticket-history`, `ticket-comments`, `support-dashboard` (`.e2e-spec.ts`) | Create | E2E helper and suites |
 | `web/package.json` | Modify | Add `react-hook-form`, `zod` and `@hookform/resolvers` (form state and client-side validation) |
 | `web/src/api.ts`, `types.ts`, `format.ts` (+ `api.test.ts`, `format.test.ts`) | Create | Client, types, duration and date formatting |

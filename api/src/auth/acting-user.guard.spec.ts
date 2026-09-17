@@ -4,7 +4,7 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { UserDto } from '../users/user.dto.js';
+import type { UserDto } from '../users/dto/user.dto.js';
 import type { UsersService } from '../users/users.service.js';
 import { Public, Roles } from './acting-user.decorators.js';
 import { ActingUserGuard } from './acting-user.guard.js';

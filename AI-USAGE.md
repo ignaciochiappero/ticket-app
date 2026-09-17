@@ -33,3 +33,4 @@
 - Design review: the AI planned plain React forms with no extra libraries; I chose react-hook-form with zod for form handling and validation in the web app.
 - Delivery plan: the AI planned one PR implemented by sub-agents in six batches; I stopped it before any code was written and chose one branch and PR per batch, implemented one at a time under my review.
 - Code structure: the AI put the startup seed inside `UsersService` and the acting-user guard in `users/`. I asked for a clearer criterion: seeds in a `*.seed.ts` file per feature and the guard in its own `auth/` folder.
+- API documentation: the AI relied on Swagger's type inference and kept all of a feature's DTOs in one file. I asked for docs a tester can use (descriptions, examples and path parameters) and a `dto/` folder with one file per DTO, treating every feature as one that will grow.
