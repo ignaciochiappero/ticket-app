@@ -49,15 +49,15 @@ API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/do
 
 ## API structure
 
-- `api/src/` is organized by feature (`users/`, `categories/`, `tickets/`, `dashboard/`), not by technical layer. Cross-cutting concerns get their own folder: `auth/` resolves the acting user and is the only place to change for real login.
+- `api/src/` is organized by feature (`users/`, `categories/`, `tickets/`, `dashboard/`), not by technical layer. Cross-cutting concerns get their own folder: `auth/` owns login, password hashing and the token guard, and is the only place to change for SSO.
 - Inside a feature, one responsibility per file, named by suffix: `*.schema.ts` (MongoDB), `*.service.ts` (business rules and queries), `*.controller.ts` (HTTP routes), `*.seed.ts` (startup data owned by the feature), `*.module.ts` (Nest wiring), `*.spec.ts` (unit tests).
 - DTOs (the API contract) live in the feature's `dto/` folder, one class per file: `dto/category.dto.ts`, `dto/save-category.dto.ts`. Design every feature as one that will grow.
 
 ## API conventions
 
-- Every request identifies the acting user with the `X-User-Id` header. `ActingUserGuard` is global, so routes are protected by default: opt out with `@Public()`, restrict roles with `@Roles()`, and read the user with `@CurrentUser()`.
+- `POST /auth/login` returns `{ token }`, a signed JWT with the user's id and role and nothing else. Clients send it as `Authorization: Bearer <token>`, and ask `GET /auth/me` for the name and role instead of decoding it. `AuthGuard` is global, so routes are protected by default: opt out with `@Public()`, restrict roles with `@Roles()`, read the user with `@CurrentUser()`, and declare `@ApiBearerAuth()` on guarded controllers. There is no session state and no logout endpoint: logging out is the client discarding its token.
 - Ownership checks (for example, "this ticket belongs to you") live in services, because they need the resource.
-- E2E tests boot the app with `test/create-test-app.ts`, which gives each test file its own database and drops it on close.
+- E2E tests boot the app with `test/create-test-app.ts`, which gives each test file its own database and drops it on close. Get a logged-in client with `loginAs(app, username)` from `test/auth.ts`.
 
 ## Rules
 

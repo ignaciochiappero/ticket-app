@@ -2,7 +2,7 @@ import type { UserRole } from '../user.schema.js';
 
 export class UserDto {
   /**
-   * User id. Send it in the X-User-Id header (Authorize button) to act as this user.
+   * User id. Tickets and history entries reference the user by this id.
    * @example "agent-1"
    */
   id: string;

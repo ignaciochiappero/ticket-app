@@ -12,18 +12,14 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Ticket App API')
     .setDescription(
-      'Support ticket system. To try it: list the users with GET /users, click Authorize and enter one of their ids (requester-1 to requester-4, or agent-1 to agent-4). Every request then runs as that user.',
+      'Support ticket system. To try it: run POST /auth/login with one of the demo users listed in the README, copy the token from the response and paste it into Authorize. Every endpoint below then runs as that user, and GET /auth/me says who that is. Tokens last 8 hours; logging out is simply discarding one.',
     )
-    .addApiKey(
-      {
-        type: 'apiKey',
-        in: 'header',
-        name: 'X-User-Id',
-        description:
-          'Id of the acting user: requester-1 to requester-4, or agent-1 to agent-4.',
-      },
-      'acting-user',
-    )
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      description: 'Token returned by POST /auth/login.',
+    })
     .build();
   SwaggerModule.setup('docs', app, () =>
     SwaggerModule.createDocument(app, config),

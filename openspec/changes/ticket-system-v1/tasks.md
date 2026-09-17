@@ -44,7 +44,16 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 - [x] 1.5 `api/src/app.module.ts`: `MongooseModule.forRootAsync`, global `ValidationPipe` via `APP_PIPE`. `api/src/main.ts`: CORS (`WEB_ORIGIN`), Swagger `X-User-Id` apiKey scheme.
 - [x] 1.6 `users/`: `user.schema.ts`, `dto/user.dto.ts`, `users.seed.ts` (`bulkWrite` seed, 4 requesters + 4 agents, fixed ids, `$setOnInsert`), `users.service.ts` (queries), `users.controller.ts` (`GET /users`, `@Public`), `users.module.ts`.
 - [x] 1.7 RED→GREEN `auth/acting-user.guard.spec.ts`: missing/unknown user → 401; wrong role → 403; `@Public` bypass. Implement `auth/acting-user.guard.ts`, `auth/acting-user.decorators.ts` (`@Public`/`@Roles`/`@CurrentUser`), `auth/auth.module.ts` (registers `APP_GUARD`).
-- [x] 1.8 RED→GREEN `user-access.e2e-spec.ts`: "Seeded users are available without any login step"; seed idempotency (second app boot, same data unchanged). The two role scenarios need role-restricted endpoints, so they moved to 2.2 and 3.3.
+- [x] 1.8 RED→GREEN `user-access.e2e-spec.ts`: "Seeded users are available without any login step"; seed idempotency (second app boot, same data unchanged). The two role scenarios need role-restricted endpoints, so they moved to 2.2 and 3.3. Superseded by login in 1.9-1.13: that first scenario becomes "Seeded users can log in with their demo credentials".
+
+- [x] 1.9 Install `@nestjs/jwt`, `cookie-parser` and `@types/cookie-parser` in `api` (signed session tokens; reading the session cookie). Same pnpm freshness and `allowBuilds` check.
+- [x] 1.10 RED→GREEN `auth/password.spec.ts`: hashing uses a random salt; the right password verifies; a wrong one does not. Implement `auth/password.ts` (`scrypt` + `timingSafeEqual`, no dependencies).
+- [x] 1.11 RED→GREEN `user-access.e2e-spec.ts`: "Seeded users can log in with their demo credentials"; "Login with a wrong password is rejected" (same 401 for an unknown username). Add `username` and `passwordHash` to `user.schema.ts` and `users.seed.ts` (hash of the demo password), `UsersService.findByUsername`; implement `auth/dto/login.dto.ts`, `auth.service.ts` (login), `auth.controller.ts` (`POST /auth/login` sets the `session` cookie).
+- [x] 1.12 RED→GREEN `auth/auth.guard.spec.ts`, replacing the `X-User-Id` guard: missing, invalid or expired token → 401; wrong role → 403; `@Public` bypass. Implement `auth.guard.ts` and `auth.decorators.ts` (renamed from `acting-user.*`), `JWT_SECRET` or a random secret at startup, and `main.ts` (`cookie-parser`, CORS credentials, Swagger cookie auth). Dropping the header also required the e2e helper `test/auth.ts` (`loginAs`) and migrating `ticket-categories.e2e-spec.ts` here, to keep the suite green in one step; `src/app.setup.ts` shares the cookie middleware with the test app.
+- [x] 1.13 RED→GREEN `user-access.e2e-spec.ts`: "A request without a valid session is rejected"; "Logging out ends the session"; "The current user endpoint returns the logged-in user"; `GET /users` now needs a session. Implement `POST /auth/logout`, `GET /auth/me`. Login and logout share `SESSION_COOKIE_OPTIONS`, because a browser only drops a cookie when the attributes match. Superseded by 1.15: with no cookie there is no server-side session to end, so the logout endpoint and its scenario are gone.
+
+- [x] 1.14 RED→GREEN `auth/auth.guard.spec.ts` and `user-access.e2e-spec.ts` ("The token from login is accepted on protected requests"): the guard reads `Authorization: Bearer` first and falls back to the cookie. Add `auth/dto/login-response.dto.ts` (`token` + `user`), return it from `POST /auth/login`, and declare `addBearerAuth()` in `main.ts` with `@ApiBearerAuth()` on guarded controllers, so Swagger's Authorize button works.
+- [x] 1.15 Reduce authentication to one credential, the bearer token (user decision: keep it standard and simple). `LoginResponseDto` becomes `{ token }` only, so identity always comes from `GET /auth/me`. Remove the cookie path: `POST /auth/logout`, `SESSION_COOKIE*`, `src/app.setup.ts`, `cookie-parser` and `@types/cookie-parser`, CORS credentials, the cookie Swagger scheme and `@ApiCookieAuth()`. Update the guard and its tests to the header only, and `test/auth.ts` to a supertest agent with a default `Authorization` header (the ticket-categories tests keep their shape). Logout moves to the web batch as discarding the token.
 
 ## Phase 2: Ticket Categories (API, mandatory)
 
@@ -66,8 +75,8 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 
 ## Phase 5: Mandatory Web - cut-safe checkpoint
 
-- [ ] 5.1 RED→GREEN `api.test.ts`, `format.test.ts`: `X-User-Id` header, `ApiError` mapping, `formatDuration`. Implement `web/src/api.ts`, `types.ts`, `format.ts`.
-- [ ] 5.2 RED→GREEN `App.test.tsx`: "Switching the acting user changes which actions and data the app shows". Implement `App.tsx` shell (load users, switcher, role layout keyed by user id).
+- [ ] 5.1 RED→GREEN `api.test.ts`, `format.test.ts`: requests send the stored bearer token, `ApiError` mapping (401 clears the token), `formatDuration`. Implement `web/src/api.ts`, `types.ts`, `format.ts`.
+- [ ] 5.2 RED→GREEN `auth/LoginForm.test.tsx` (empty fields block submit; wrong credentials show the API message; a valid login reports the user) and `App.test.tsx`: "Logging in shows the views for the user's role". Implement `auth/validation.ts`, `auth/LoginForm.tsx` and the `App.tsx` shell (token in `localStorage`, `GET /auth/me`, login form or role layout keyed by user id, logout that discards the token).
 - [ ] 5.3 `tickets/validation.ts`: zod schemas mirroring API DTO limits (exercised by 5.4).
 - [ ] 5.4 RED→GREEN `TicketForm.test.tsx`: empty/too-long blocks submit with a field message; valid input calls `onSubmit`; rejected `onSubmit` shows the API message (`root.server`). Implement `TicketForm.tsx` (react-hook-form + `zodResolver`, create and edit).
 - [ ] 5.5 RED→GREEN `Timeline.test.tsx`: events render in order; edits show from→to with resolved category names. Implement `Timeline.tsx`.
@@ -92,12 +101,12 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 - [ ] 8.1 Run `pnpm run check` (lint + unit, api + web); fix any failure.
 - [ ] 8.2 `docker compose up -d mongo`, run `pnpm -C api test:e2e`; all 6 capability files pass, including concurrent-take and the category race.
 - [ ] 8.3 `docker compose up --build` end to end: seeded users/categories visible, full ticket flow works through the UI with no manual steps.
-- [ ] 8.4 Check `http://localhost:3000/docs`: only product endpoints listed, `X-User-Id` Authorize works, schemas match design section 5.
+- [ ] 8.4 Check `http://localhost:3000/docs`: only product endpoints listed, logging in from `/docs` authenticates the later calls, schemas match design section 5.
 
 ## Phase 9: Delivery Documentation
 
-- [ ] 9.1 `README.md`: Docker and dev run steps, 4 requester + 4 agent seeded users, 4 starter categories, Swagger at `/docs`.
-- [ ] 9.2 `DECISIONS.md`: data model and why (design sections 2, 11); ticket state machine and why those states (design section 3, proposal lifecycle table); optional features discarded and the selection criteria (proposal Out of Scope table); what breaks or gets redesigned at 50,000 tickets/month and 5 support areas (design section 11 subsection); conscious technical debt (category over-locking on failed writes, no transactions, manual zod/class-validator limit mirroring, no pagination or extra indexes).
+- [ ] 9.1 `README.md`: Docker and dev run steps, 4 requester + 4 agent seeded users with their usernames and the demo password, 4 starter categories, Swagger at `/docs`.
+- [ ] 9.2 `DECISIONS.md`: data model and why (design sections 2, 11); ticket state machine and why those states (design section 3, proposal lifecycle table); optional features discarded and the selection criteria (proposal Out of Scope table); what breaks or gets redesigned at 50,000 tickets/month and 5 support areas (design section 11 subsection); conscious technical debt (category over-locking on failed writes, no transactions, manual zod/class-validator limit mirroring, no pagination or extra indexes, demo credentials in the seed, a role that stays valid until the token expires with no refresh or revocation, no server-side logout, and the token in `localStorage`).
 - [ ] 9.3 `DECISIONS.md` Quality Strategy section: what's tested and how (design section 9 table), what's not (browser/visual e2e, load beyond the 4-agent race), and prioritization rationale (concurrency and authorization first, per proposal Risks table).
 - [ ] 9.4 Throughout apply: append a one-line `## Log` entry to `AI-USAGE.md` for each rejected/corrected decision (skip minor wording, per AGENTS.md rule). At delivery, finish `## What I fully delegated` / `## Where I intervened and why` / `## AI output I rejected` for the implementation phase - do not rewrite existing planning-phase content.
 - [ ] 9.5 Update `AGENTS.md` (module structure, e2e per-test-database note, pointer to `DECISIONS.md`); create `.agents/context/domain.md` and `.agents/context/data-model.md`.
@@ -108,7 +117,7 @@ Decided by the user: one branch and one PR per batch, created from `main` and me
 
 | Batch | Phases | Branch | Suggested commit |
 |-------|--------|--------|-------------------|
-| 1. API foundation and categories | 1-2 | `feat/api-foundation-categories` | `feat(api): add acting-user auth, seeded users, and categories` |
+| 1. API foundation, authentication and categories | 1-2 | `feat/api-foundation-categories` | already committed: dependencies, foundation, categories; then `feat(api): add login with bearer tokens` |
 | 2. Ticket lifecycle and history | 3-4 | `feat/api-ticket-lifecycle` | `feat(api): add ticket lifecycle with embedded audit history` |
 | 3. Mandatory web | 5 | `feat/web-ticket-views` | `feat(web): add switcher, requester/agent ticket views, and category admin` |
 | 4. Comments (optional) | 6 | `feat/ticket-comments` | `feat: add ticket comments end to end` |

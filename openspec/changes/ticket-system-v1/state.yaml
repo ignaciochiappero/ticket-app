@@ -11,7 +11,7 @@ phases:
   spec: approved
   design: approved
   tasks: done
-  apply: pending
+  apply: in-progress
   verify: pending
   archive: pending
 
@@ -21,6 +21,6 @@ artifacts:
   design: openspec/changes/ticket-system-v1/design.md
 
 next_recommended:
-  - sdd-tasks
+  - sdd-apply
 
-awaiting: user approval of specs and design
+awaiting: nothing. Phases 1 (foundation and login) and 2 (categories) are implemented on branch feat/api-foundation-categories; next batch is phase 3 (ticket lifecycle)

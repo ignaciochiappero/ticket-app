@@ -19,6 +19,11 @@ export class UsersService {
     const user = await this.userModel.findById(id).lean();
     return user ? toUserDto(user) : null;
   }
+
+  // Returns the stored user, password hash included, so only the auth module compares passwords.
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userModel.findOne({ username }).lean();
+  }
 }
 
 function toUserDto(user: User): UserDto {

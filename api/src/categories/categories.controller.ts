@@ -11,15 +11,15 @@ import {
 import { IsObjectIdPipe } from '@nestjs/mongoose';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiParam,
-  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Roles } from '../auth/acting-user.decorators.js';
+import { Roles } from '../auth/auth.decorators.js';
 import { CategoriesService } from './categories.service.js';
 import { CategoryDto } from './dto/category.dto.js';
 import { SaveCategoryDto } from './dto/save-category.dto.js';
@@ -31,8 +31,8 @@ const CATEGORY_ID_PARAM = {
 };
 
 @ApiTags('Categories')
-@ApiSecurity('acting-user')
-@ApiUnauthorizedResponse({ description: 'Missing or unknown X-User-Id' })
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'No valid token: log in first' })
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
