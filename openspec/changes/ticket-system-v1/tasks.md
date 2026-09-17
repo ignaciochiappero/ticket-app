@@ -26,14 +26,14 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 | 2    | Ticket lifecycle + history (API)      | PR 1 (single) | Phases 3-4; depends on Unit 1                             |
 | 3    | Mandatory web (requester/agent views) | PR 1 (single) | Phase 5; cut-safe checkpoint - full product usable via UI |
 | 4    | Comments (API + web)                  | PR 1 (single) | Phase 6; optional, droppable                              |
-| 5    | Dashboard (API + web)                 | PR 1 (single) | Phase 7; optional, droppable                              |
+| 5    | Search and filters (API + web)        | PR 1 (single) | Phase 7; optional, droppable                              |
 | 6    | Verification + delivery docs          | PR 1 (single) | Phases 8-9; gates the final commit                        |
 
 **TDD convention**: every `RED→GREEN` task means write the failing test(s) named exactly as quoted, confirm they fail, implement the minimum to pass, then refactor before moving on (`strict_tdd: true`).
 
-**Build order note**: mandatory web views (Phase 5) sit right after the mandatory API (Phases 1-4) and before optional API capabilities (Phases 6-7). A deadline cut after Phase 5 still leaves a fully usable, demoable product - only Comments and Dashboard are lost.
+**Build order note**: mandatory web views (Phase 5) sit right after the mandatory API (Phases 1-4) and before optional API capabilities (Phases 6-7). A deadline cut after Phase 5 still leaves a fully usable, demoable product - only Comments and the filters are lost.
 
-**Parallel vs sequential**: tasks within a phase are sequential (each e2e file and `TicketDetail.tsx` accumulate scenarios/actions across tasks). Across phases, 1.1 and 1.2 (dependency installs) are independent of each other. Phase 6 (Comments) and Phase 7 (Dashboard) are independent of each other - both only depend on Phase 5 - so a second implementer could take one while the first takes the other. Everything else is strictly sequential.
+**Parallel vs sequential**: tasks within a phase are sequential (each e2e file and `TicketDetail.tsx` accumulate scenarios/actions across tasks). Across phases, 1.1 and 1.2 (dependency installs) are independent of each other. Phase 6 (Comments) and Phase 7 (Search and filters) are independent of each other - both only depend on Phase 5 - so a second implementer could take one while the first takes the other. Everything else is strictly sequential.
 
 ## Phase 1: Foundation
 
@@ -62,12 +62,12 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 
 ## Phase 3: Ticket Lifecycle (API, mandatory)
 
-- [ ] 3.1 `ticket.schema.ts` (embedded `history`), `dto/` with one file per DTO (`TicketDto`, `TicketSummaryDto`, `HistoryEventDto`, `CreateTicketDto`, `UpdateTicketDto`), documented for Swagger.
+- [ ] 3.1 `ticket.schema.ts` (embedded `history`, unique `code`), `dto/` with one file per DTO (`PersonDto`, `TicketDto`, `TicketSummaryDto`, `PaginatedTicketsDto`, `HistoryEventDto`, `CreateTicketDto`, `UpdateTicketDto`), documented for Swagger. Add `counters/` (`counters.service.ts`, `counters.module.ts`): `findOneAndUpdate({ _id }, { $inc: { seq: 1 } }, { upsert: true, returnDocument: 'after' })`, unit tested for two concurrent calls never sharing a number.
 - [ ] 3.2 RED→GREEN `ticket-rules.spec.ts`: "A requester cannot modify a ticket created by another requester"; "Editing a ticket records the previous and new values of changed fields"; role/state/assignee/deleted checks per action. Implement `ticket-rules.ts`.
 - [ ] 3.3 RED→GREEN `ticket-lifecycle.e2e-spec.ts` (create/edit/delete): "Requester creates a ticket in an existing category"; "Creating a ticket with a nonexistent category fails"; "Requester edits title, description, and category of their own open ticket"; "Editing a ticket that is not open is rejected"; "Requester deletes their own open ticket"; "Any action attempted on a soft-deleted ticket fails as not found". Also add "An agent attempting a requester-only action is rejected" to `user-access.e2e-spec.ts` (agent calls `POST /tickets`). Implement `CategoriesService.markUsed()`, then `tickets.service.ts`/`tickets.controller.ts` create/edit/delete (edit as compare-and-set, create calls `markUsed`), `tickets.module.ts` (imports `CategoriesModule`); register in `app.module.ts`.
 - [ ] 3.4 RED→GREEN addition to `ticket-categories.e2e-spec.ts` (needs tickets from 3.3): "A category currently assigned to a ticket cannot be edited or deleted"; "A category previously assigned to an edited ticket remains locked"; "A category assigned to a soft-deleted ticket remains locked"; concurrent delete-category vs create-ticket race never both succeed (design section 9 "Category race"). Pure verification - no new production code.
 - [ ] 3.5 RED→GREEN same e2e file (transitions): "Agent takes an open ticket and becomes its assignee"; "Second agent cannot take a ticket that is already in progress" (4 agents, `Promise.all`); "Assigned agent releases an in-progress ticket back to the open queue"; "A released ticket can be edited or deleted by its requester again"; "Assigned agent resolves an in-progress ticket"; "An agent who is not the assignee cannot resolve the ticket"; "A resolved ticket cannot be taken, released, or resolved again". Implement take/release/resolve as conditional `findOneAndUpdate` + re-read-and-classify on `null`.
-- [ ] 3.6 RED→GREEN same e2e file (lists): "Requester's ticket list shows only tickets they created"; "Agent's ticket list shows all tickets grouped by state with each ticket's assignee". Implement `GET /tickets` (role-scoped) + `GET /tickets/:id`.
+- [ ] 3.6 RED→GREEN same e2e file (the board): "Requester's ticket list shows only tickets they created"; "Agent's board shows every ticket with its state and assignee". Implement `GET /tickets` (role-scoped, paginated with `PaginationQueryDto`, newest first) + `GET /tickets/:id`, both resolving `requester`, `assignee` and each event's `actor` to `{ id, name }` through `UsersService`.
 
 ## Phase 4: Ticket History (API, mandatory)
 
@@ -75,6 +75,7 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 
 ## Phase 5: Mandatory Web - cut-safe checkpoint
 
+- [ ] 5.0 Install `react-router` in `web`, initialise shadcn/ui (Tailwind v4 mode, so the config path stays blank) and add the SPA fallback to `web/Dockerfile` (`try_files $uri /index.html` in the nginx config), then verify `docker compose up --build` still serves a deep link. Same pnpm freshness and `allowBuilds` check; every component shadcn copies in is our code from then on.
 - [ ] 5.1 RED→GREEN `api.test.ts`, `format.test.ts`: requests send the stored bearer token, `ApiError` mapping (401 clears the token), `formatDuration`. Implement `web/src/api.ts`, `types.ts`, `format.ts`.
 - [ ] 5.2 RED→GREEN `auth/LoginForm.test.tsx` (empty fields block submit; wrong credentials show the API message; a valid login reports the user) and `App.test.tsx`: "Logging in shows the views for the user's role". Implement `auth/validation.ts`, `auth/LoginForm.tsx` and the `App.tsx` shell (token in `localStorage`, `GET /auth/me`, login form or role layout keyed by user id, logout that discards the token).
 - [ ] 5.3 `tickets/validation.ts`: zod schemas mirroring API DTO limits (exercised by 5.4).
@@ -90,11 +91,12 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 - [ ] 6.1 RED→GREEN `ticket-comments.e2e-spec.ts`: "Requester adds a comment to their own ticket"; "Agent adds a comment to a ticket"; "Adding a comment to a resolved ticket fails"; "A comment cannot be edited or deleted after creation" (no PATCH/DELETE route exists - Nest 404s by default); "A comment made by an agent is visible to the ticket's requester". Implement `dto/create-comment.dto.ts`, `POST /tickets/:id/comments` (`$push commented`, state check).
 - [ ] 6.2 RED→GREEN `CommentForm.test.tsx`: empty/too-long blocks submit; valid input calls `onSubmit`. Implement `CommentForm.tsx` (react-hook-form + zod), wire into `TicketDetail.tsx`.
 
-## Phase 7: Support Dashboard (optional)
+## Phase 7: Search and Filters (optional)
 
-- [ ] 7.1 RED→GREEN `dashboard.service.spec.ts`: "Dashboard shows ticket counts per state including a single Open (unassigned) figure"; "Median time to take is computed only from tickets that have been taken"; "Median time to resolve is computed only from resolved tickets"; "Dashboard shows elapsed time in current state for open and in-progress tickets" (odd/even/empty medians; time-in-state reset only by `created`/`taken`/`released`, not edits/comments). Implement `computeDashboard()`, `dto/dashboard.dto.ts`.
-- [ ] 7.2 RED→GREEN `support-dashboard.e2e-spec.ts`: "Requester cannot access the dashboard"; "Soft-deleted tickets are excluded from dashboard counts". Implement `dashboard.controller.ts` (`GET /dashboard`, agent-only), `dashboard.module.ts` (`forFeature` reuse of the `Ticket` model); register in `app.module.ts`.
-- [ ] 7.3 RED→GREEN `Dashboard.test.tsx`: counts/medians render, "—" when `null`. Implement `dashboard/Dashboard.tsx`.
+- [ ] 7.1 RED→GREEN `tickets/ticket-query.spec.ts`: with nothing asked, the filter carries the active states and the caller's scope; an asked-for state replaces the default; `assignee=unassigned` filters `assigneeId: null` while an id filters that agent; `q` becomes an `$or` over an anchored `code` and a contains `title`, case-insensitive; the date ranges become `createdAt` bounds and a `history.$elemMatch` on `taken`; `order` sorts `createdAt` with `_id` in the same direction. Implement `tickets/ticket-query.ts` and `tickets/dto/ticket-query.dto.ts` (extends `PaginationQueryDto`, documented for Swagger).
+- [ ] 7.2 RED→GREEN `ticket-search.e2e-spec.ts`: "The board shows active tickets and hides resolved ones"; "Resolved tickets are found through the state filter"; "No filter brings back a soft-deleted ticket"; "Filters combine to narrow the board"; "A ticket is found by its code or its title"; "A ticket is found by the name of the person involved"; "Unassigned tickets can be singled out"; "A requester's filters never reach another requester's tickets"; "The board is sorted by creation date in both directions"; "The oldest active tickets are the ones that have waited longest". Wire the query builder into `GET /tickets` (the paginated board from 3.6) and resolve `person=` to user ids through `UsersService`.
+- [ ] 7.3 RED→GREEN same e2e file, the optional date ranges: "Tickets are narrowed to a creation date range"; "Tickets are narrowed to when they were taken". First thing to drop if the deadline bites.
+- [ ] 7.4 RED→GREEN `TicketFilters.test.tsx`: the active states come preselected; typing fetches nothing until Apply; Apply writes the filters into the query string; clearing returns to the default board. Implement `tickets/TicketFilters.tsx` and read the filters from the URL in `AgentTickets`/`RequesterTickets`.
 
 ## Phase 8: Verification
 
@@ -119,7 +121,7 @@ Decided by the user: one branch and one PR per batch, created from `main` and me
 | ------------------------------------------------ | ------ | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | 1. API foundation, authentication and categories | 1-2    | `feat/api-foundation-categories` | already committed: dependencies, foundation, categories; then `feat(api): add login with bearer tokens` |
 | 2. Ticket lifecycle and history                  | 3-4    | `feat/api-ticket-lifecycle`      | `feat(api): add ticket lifecycle with embedded audit history`                                           |
-| 3. Mandatory web                                 | 5      | `feat/web-ticket-views`          | `feat(web): add switcher, requester/agent ticket views, and category admin`                             |
+| 3. Mandatory web                                 | 5      | `feat/web-ticket-views`          | `feat(web): add login, requester and agent boards, and category admin`                                  |
 | 4. Comments (optional)                           | 6      | `feat/ticket-comments`           | `feat: add ticket comments end to end`                                                                  |
-| 5. Dashboard (optional)                          | 7      | `feat/support-dashboard`         | `feat: add support dashboard metrics end to end`                                                        |
+| 5. Search and filters (optional)                 | 7      | `feat/ticket-search`             | `feat: add ticket filters, sorting and search end to end`                                               |
 | 6. Delivery and docs                             | 8-9    | `docs/delivery`                  | `docs: add README, DECISIONS, and finish AI usage log`                                                  |

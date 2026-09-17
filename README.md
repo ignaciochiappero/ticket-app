@@ -137,4 +137,4 @@ Without `JWT_SECRET` the API logs a warning and signs tokens with a random secre
 The work is split into batches, tracked in [`openspec/changes/ticket-system-v1/tasks.md`](openspec/changes/ticket-system-v1/tasks.md).
 
 - **Done**: project setup, API foundation, seeded users, login and role enforcement, ticket categories.
-- **In progress**: ticket lifecycle and history, the web views, comments and the metrics dashboard.
+- **In progress**: ticket lifecycle and history, the web boards, comments, and ticket search with filters.
