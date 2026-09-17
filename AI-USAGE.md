@@ -32,3 +32,4 @@
 - Scope review before the proposal: the AI suggested fixed categories and leaving ticket edit and delete out. I defined categories managed by agents (editable and deletable only if no ticket ever used them), a tracked "release to queue" action, editing and deleting tickets, time in the current state on the dashboard, and 4 requesters plus 4 agents as seed users.
 - Design review: the AI planned plain React forms with no extra libraries; I chose react-hook-form with zod for form handling and validation in the web app.
 - Delivery plan: the AI planned one PR implemented by sub-agents in six batches; I stopped it before any code was written and chose one branch and PR per batch, implemented one at a time under my review.
+- Code structure: the AI put the startup seed inside `UsersService` and the acting-user guard in `users/`. I asked for a clearer criterion: seeds in a `*.seed.ts` file per feature and the guard in its own `auth/` folder.

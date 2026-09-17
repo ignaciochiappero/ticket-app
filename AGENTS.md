@@ -47,6 +47,17 @@ API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/do
 | Lint and unit tests (also runs on pre-commit) | `pnpm run check` |
 | API e2e tests (needs MongoDB) | `pnpm -C api test:e2e` |
 
+## API structure
+
+- `api/src/` is organized by feature (`users/`, `categories/`, `tickets/`, `dashboard/`), not by technical layer. Cross-cutting concerns get their own folder: `auth/` resolves the acting user and is the only place to change for real login.
+- Inside a feature, one responsibility per file, named by suffix: `*.schema.ts` (MongoDB), `*.dto.ts` (API contract), `*.service.ts` (business rules and queries), `*.controller.ts` (HTTP routes), `*.seed.ts` (startup data owned by the feature), `*.module.ts` (Nest wiring), `*.spec.ts` (unit tests).
+
+## API conventions
+
+- Every request identifies the acting user with the `X-User-Id` header. `ActingUserGuard` is global, so routes are protected by default: opt out with `@Public()`, restrict roles with `@Roles()`, and read the user with `@CurrentUser()`.
+- Ownership checks (for example, "this ticket belongs to you") live in services, because they need the resource.
+- E2E tests boot the app with `test/create-test-app.ts`, which gives each test file its own database and drops it on close.
+
 ## Rules
 
 - Build only what the task needs. Do not add dependencies, layers or features without a stated reason.

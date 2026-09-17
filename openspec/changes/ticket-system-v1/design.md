@@ -10,8 +10,9 @@ A NestJS modular monolith with one module per capability (`users`, `categories`,
 
 | Module | Responsibility |
 |---|---|
-| `users/` | `User` schema, seed, `GET /users`, global `ActingUserGuard` (`APP_GUARD`), `@Public()`, `@Roles()`, `@CurrentUser()` |
-| `categories/` | `Category` schema, seed, back-office CRUD, `markUsed()` for tickets |
+| `auth/` | Global `ActingUserGuard` (`APP_GUARD`), `@Public()`, `@Roles()`, `@CurrentUser()`; the only place to change for real login |
+| `users/` | `User` schema, seed (`users.seed.ts`), `GET /users`, `UsersService` used by the guard |
+| `categories/` | `Category` schema, seed (`categories.seed.ts`), back-office CRUD, `markUsed()` for tickets |
 | `tickets/` | `Ticket` schema with embedded history, lifecycle and comment endpoints, `ticket-rules.ts` (pure role, owner, assignee and state checks) |
 | `dashboard/` | `GET /dashboard`, pure `computeDashboard()`; registers the `Ticket` model read-only (`forFeature` reuses the existing model) |
 | `app.module.ts` | `MongooseModule.forRootAsync` (reads `MONGODB_URI` at init), `ValidationPipe` via `APP_PIPE` so e2e apps get production validation |
@@ -177,7 +178,7 @@ Median: sort ascending; odd count → middle value; even → mean of the two mid
 
 ## 7. Seeding
 
-`OnApplicationBootstrap` in each owning service, so it runs for `docker compose up --build`, `pnpm run dev` and every e2e app:
+A `*.seed.ts` provider in each owning feature (`OnApplicationBootstrap`), so it runs for `docker compose up --build`, `pnpm run dev` and every e2e app:
 
 - **Users**: `bulkWrite` upserts by fixed `_id` with `$setOnInsert`; re-runs change nothing.
 - **Categories**: `await model.init()` (unique index ready), then insert Access, Hardware, Software and Other only when the collection is empty, so renamed or deleted starter categories do not come back on restart.
@@ -221,8 +222,9 @@ Each spec scenario title becomes an identical `it()` name in the layer that owns
 | `api/src/main.ts` | Modify | CORS, Swagger api-key scheme |
 | `api/src/app.module.ts` | Modify | `forRootAsync`, `APP_PIPE`, feature modules |
 | `api/src/app.controller.ts`, `app.service.ts`, `app.controller.spec.ts`, `api/test/app.e2e-spec.ts` | Delete | Hello-world scaffold; Swagger lists only product endpoints |
-| `api/src/users/` `user.schema`, `user.dto`, `users.controller`, `users.service`, `users.module`, `acting-user.guard` (+ `.spec`), `acting-user.decorators` (`.ts`) | Create | Users, seed, acting user |
-| `api/src/categories/` `category.schema`, `category.dto`, `categories.controller`, `categories.service`, `categories.module` (`.ts`) | Create | Back office, lock, seed |
+| `api/src/auth/` `acting-user.guard` (+ `.spec`), `acting-user.decorators`, `auth.module` (`.ts`) | Create | Acting user |
+| `api/src/users/` `user.schema`, `user.dto`, `users.controller`, `users.service`, `users.seed`, `users.module` (`.ts`) | Create | Users and seed |
+| `api/src/categories/` `category.schema`, `category.dto`, `categories.controller`, `categories.service`, `categories.seed`, `categories.module` (`.ts`) | Create | Back office, lock, seed |
 | `api/src/tickets/` `ticket.schema`, `ticket.dto`, `tickets.controller`, `tickets.service`, `tickets.module`, `ticket-rules` (+ `.spec`) (`.ts`) | Create | Lifecycle, history, comments |
 | `api/src/dashboard/` `dashboard.dto`, `dashboard.controller`, `dashboard.service` (+ `.spec`), `dashboard.module` (`.ts`) | Create | Metrics |
 | `api/test/create-test-app.ts`; `user-access`, `ticket-categories`, `ticket-lifecycle`, `ticket-history`, `ticket-comments`, `support-dashboard` (`.e2e-spec.ts`) | Create | E2E helper and suites |
