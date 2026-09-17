@@ -1,0 +1,5 @@
+# Marks web as its own workspace root, like api. Two reasons: the Dockerfile
+# installs from this folder alone, and tools that resolve a workspace upwards
+# (the shadcn CLI, for one) would otherwise look for this project's config in
+# the repository root. Dependency build scripts are allowed or denied here.
+allowBuilds: {}
