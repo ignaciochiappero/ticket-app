@@ -1,1 +1,159 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/geist';
+
+/* The theme's source of truth is `data-theme` on <html>, set in index.html.
+   An attribute beats a class here: one place to read, one place to flip. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ==========================================================================
+   Design tokens
+
+   Two rules, taken from the Fragua design system:
+
+   1. Surfaces are separated by LUMINANCE, never by strokes. Every panel is a
+      step on the elevation ladder below. Reach for a border only when a shape
+      genuinely needs an outline: an outline button, a focus ring.
+   2. The accent is the only loud colour on screen. Everything else is a step
+      on the ladder or a step on the ink scale.
+
+   Dark is the default. The light theme lives under [data-theme='light'].
+   ========================================================================== */
+
+@theme {
+  /* --- Elevation ladder -------------------------------------------------- */
+  --color-ground: #17181c; /* page background        */
+  --color-surface: #232427; /* panels, cards          */
+  --color-raised: #2d2e32; /* nested panels, inputs  */
+  --color-tile: #454549; /* chips, hover surfaces  */
+
+  /* --- Ink --------------------------------------------------------------- */
+  --color-ink: #ffffff;
+  --color-ink-muted: #a2a2a4; /* body copy              */
+  --color-ink-dim: #8c8d8f; /* captions, metadata     */
+
+  /* --- Accent ramp -------------------------------------------------------
+     Fragua's ember shifted to its orange end. The red it starts from would
+     collide with the destructive colour, and a ticket system needs red to
+     mean "this deletes something". */
+  --color-accent-300: #f7b98d;
+  --color-accent-500: #f2994a;
+  --color-accent-700: #b96f2f;
+
+  /* --- Radii ------------------------------------------------------------- */
+  --radius-tile: 8px;
+  --radius-panel: 16px;
+  --radius-pill: 32px;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+/* shadcn reads colours through these names, so the ladder is wired into them
+   once and every component inherits it. Note `--accent` is shadcn's subtle
+   hover surface, not the brand colour: that one is `--primary`. */
+:root {
+  --radius: 10px;
+
+  --background: var(--color-ground);
+  --foreground: var(--color-ink);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-raised);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-accent-500);
+  --primary-foreground: #241505;
+  --secondary: var(--color-raised);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-raised);
+  --muted-foreground: var(--color-ink-muted);
+  --accent: var(--color-tile);
+  --accent-foreground: var(--color-ink);
+  --destructive: #e5484d;
+  --border: oklch(1 0 0 / 8%);
+  --input: var(--color-raised);
+  --ring: var(--color-accent-500);
+  --sidebar: var(--color-surface);
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-accent-500);
+  --sidebar-primary-foreground: #241505;
+  --sidebar-accent: var(--color-tile);
+  --sidebar-accent-foreground: var(--color-ink);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: var(--color-accent-500);
+}
+
+/* Paper: the same ladder read from the other end. */
+[data-theme='light'] {
+  --background: #faf9f8;
+  --foreground: #17181c;
+  --card: #ffffff;
+  --card-foreground: #17181c;
+  --popover: #ffffff;
+  --popover-foreground: #17181c;
+  --primary: var(--color-accent-700);
+  --primary-foreground: #ffffff;
+  --secondary: #f1efed;
+  --secondary-foreground: #17181c;
+  --muted: #f1efed;
+  --muted-foreground: #5f6063;
+  --accent: #e8e5e1;
+  --accent-foreground: #17181c;
+  --destructive: #ce2c31;
+  --border: oklch(0 0 0 / 10%);
+  --input: #ffffff;
+  --ring: var(--color-accent-700);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #17181c;
+  --sidebar-primary: var(--color-accent-700);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8e5e1;
+  --sidebar-accent-foreground: #17181c;
+  --sidebar-border: oklch(0 0 0 / 10%);
+  --sidebar-ring: var(--color-accent-700);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

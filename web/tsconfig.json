@@ -3,5 +3,10 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  // The app config is what compiles src/. This copy of the alias exists because
+  // tools read the root tsconfig to resolve `@/`: the shadcn CLI is one of them.
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] }
+  }
 }

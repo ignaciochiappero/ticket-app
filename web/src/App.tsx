@@ -1,9 +1,13 @@
-function App() {
+import { AuthProvider } from '@/features/auth/AuthContext';
+import { BrowserRouter } from 'react-router';
+import { AppRoutes } from '@/routes';
+
+export default function App() {
   return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold">Ticket App</h1>
-    </main>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
-
-export default App;
