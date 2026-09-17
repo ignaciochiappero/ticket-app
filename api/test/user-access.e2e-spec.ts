@@ -38,6 +38,23 @@ describe('user-access (e2e)', () => {
     expect(users.filter((user) => user.role === 'agent')).toHaveLength(4);
   });
 
+  it('A requester attempting an agent-only action is rejected', async () => {
+    const server = testApp.app.getHttpServer();
+
+    await request(server)
+      .post('/categories')
+      .set('X-User-Id', 'requester-1')
+      .send({ name: 'Printers' })
+      .expect(403);
+
+    const response = await request(server)
+      .get('/categories')
+      .set('X-User-Id', 'requester-1')
+      .expect(200);
+    const names = (response.body as { name: string }[]).map((c) => c.name);
+    expect(names).not.toContain('Printers');
+  });
+
   it('Restarting the app keeps the seeded users unchanged', async () => {
     const before = await request(testApp.app.getHttpServer())
       .get('/users')
