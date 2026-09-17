@@ -1,5 +1,6 @@
 import { AppShell } from '@/components/layout/AppShell';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { CategoriesPage } from '@/features/categories/CategoriesPage';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { LandingPage } from '@/features/landing/LandingPage';
 import { TicketsPage } from '@/features/tickets/TicketsPage';
@@ -16,7 +17,17 @@ const routes: RouteObject[] = [
         <AppShell />
       </RequireAuth>
     ),
-    children: [{ path: '/tickets', element: <TicketsPage /> }],
+    children: [
+      { path: '/tickets', element: <TicketsPage /> },
+      {
+        path: '/categories',
+        element: (
+          <RequireAuth role="agent">
+            <CategoriesPage />
+          </RequireAuth>
+        ),
+      },
+    ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
 ];

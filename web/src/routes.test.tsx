@@ -68,6 +68,23 @@ describe('routes', () => {
     expect(screen.queryByRole('link', { name: 'Categories' })).toBe(null);
   });
 
+  it('keeps a requester out of the agent-only back office', async () => {
+    localStorage.setItem('ticket-app.token', 'a-token');
+    fetchCurrentUser.mockResolvedValue({
+      id: 'requester-1',
+      name: 'Lucía Fernández',
+      role: 'requester',
+    });
+
+    renderAt('/categories');
+
+    // Bounced to their own board rather than shown an empty screen.
+    expect(
+      await screen.findByRole('heading', { name: 'Tickets' }),
+    ).toBeDefined();
+    expect(screen.queryByRole('heading', { name: 'Categories' })).toBe(null);
+  });
+
   it('takes an unknown path back to the front door', () => {
     renderAt('/nowhere');
 

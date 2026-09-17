@@ -83,7 +83,7 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 - [ ] 5.5 RED→GREEN `Timeline.test.tsx`: events render in order; edits show from→to with resolved category names. Implement `Timeline.tsx`.
 - [ ] 5.6 RED→GREEN `RequesterTickets.test.tsx` + `TicketDetail.test.tsx`: owner sees edit/delete only while `open`. Implement `RequesterTickets.tsx` + `TicketDetail.tsx` (owner actions).
 - [ ] 5.7 RED→GREEN `AgentTickets.test.tsx` + same `TicketDetail.test.tsx`: grouped by state with assignee; take/release/resolve shown by state and assignee. Implement `AgentTickets.tsx` + agent actions in `TicketDetail.tsx`.
-- [ ] 5.8 RED→GREEN `CategoriesAdmin.test.tsx`: rename/delete disabled when `used`. Implement `categories/validation.ts`, `CategoryForm.tsx`, `CategoriesAdmin.tsx`.
+- [x] 5.8 RED→GREEN `CategoriesPage.test.tsx` (7 scenarios): the list marks used categories, rename and delete are disabled on them, an empty name never reaches the API, creating reloads the list, a duplicate name shows the API's message, renaming goes through the row, and deleting takes a second click to confirm. Implement `categories/validation.ts`, `CategoryForm.tsx` (one form for create and rename) and `CategoriesPage.tsx`, plus the agent-only route. Named `CategoriesPage`, not `CategoriesAdmin`, to match the `*Page` convention the other screens use.
 - [ ] 5.9 Checkpoint: the mandatory product is usable end to end via the UI. Safe point to cut Phases 6-7 if the deadline forces it.
 
 ## Phase 6: Ticket Comments (optional)
