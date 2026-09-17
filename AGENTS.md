@@ -30,12 +30,14 @@ You are a senior engineer with many years of experience and a mentor who enjoys 
 ## Stack
 
 - pnpm 11, Node 22, Docker Compose
-- `api/`: NestJS 12 (ESM: relative imports end in `.js`), Mongoose 9, MongoDB 8, Vitest, oxlint
+- `api/`: NestJS 12 (ESM: relative imports end in `.js`), Mongoose 9, MongoDB 8, Swagger (OpenAPI), Vitest, oxlint
 - `web/`: React 19, Vite 8, TypeScript 6, oxlint
 
 Your training data may predate these versions. Check the installed code or the official docs before using an API.
 
 ## Commands
+
+API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/docs-json`.
 
 | Task | Command |
 | --- | --- |
@@ -51,6 +53,8 @@ Your training data may predate these versions. Check the installed code or the o
 - Every behavior change ships with Vitest tests. Run lint and tests before committing.
 - Commits follow Conventional Commits.
 - Code, identifiers and comments are in English.
+- Every API endpoint must show up correctly in Swagger. The Swagger CLI plugin infers DTOs; add decorators only for what it cannot infer.
+- pnpm blocks dependency build scripts. When a new dependency needs one, allow or deny it explicitly with `allowBuilds` in that project's `pnpm-workspace.yaml`.
 
 ## Skills
 
