@@ -1,4 +1,5 @@
 import type { OpenAPIObject } from '@nestjs/swagger';
+import request from 'supertest';
 import { buildOpenApiDocument } from '../src/openapi.js';
 import { createTestApp, type TestApp } from './create-test-app.js';
 
@@ -43,6 +44,16 @@ describe('openapi (e2e)', () => {
     }
 
     expect(unprotected).toEqual([]);
+  });
+
+  it('points a browser at the documentation from the API root', async () => {
+    // No token: whoever opens the API for the first time does not have one yet.
+    const response = await request(testApp.app.getHttpServer())
+      .get('/')
+      .expect(200);
+
+    expect(response.headers['content-type']).toMatch(/text\/html/);
+    expect(response.text).toContain('href="/docs"');
   });
 
   it('declares the endpoints the web app needs', () => {
