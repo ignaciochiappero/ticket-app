@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -36,6 +37,22 @@ export class CategoriesService {
       this.categoryModel.countDocuments(),
     ]);
     return { items: categories.map(toCategoryDto), total, page, limit };
+  }
+
+  /**
+   * Locks a category because a ticket is about to point at it. Called before
+   * the ticket is written: both this and a delete are single-document writes on
+   * the same category, so MongoDB serializes them and a ticket can never end up
+   * referencing a category somebody deleted a millisecond earlier.
+   */
+  async markUsed(id: string): Promise<void> {
+    const { matchedCount } = await this.categoryModel.updateOne(
+      { _id: id },
+      { $set: { used: true } },
+    );
+    if (matchedCount === 0) {
+      throw new BadRequestException('This category does not exist');
+    }
   }
 
   async create({ name }: SaveCategoryDto): Promise<CategoryDto> {

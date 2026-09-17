@@ -100,6 +100,18 @@ describe('user-access (e2e)', () => {
     expect(items.map((category) => category.name)).not.toContain('Printers');
   });
 
+  it('An agent attempting a requester-only action is rejected', async () => {
+    const agent = await loginAs(testApp.app, 'carla.ruiz');
+    const categories = await agent.get('/categories?limit=100').expect(200);
+    const { id } = (categories.body as { items: { id: string }[] }).items[0];
+
+    // Agents work the queue; they do not open tickets on somebody's behalf.
+    await agent
+      .post('/tickets')
+      .send({ title: 'Not mine to open', description: 'x', categoryId: id })
+      .expect(403);
+  });
+
   it('Restarting the app keeps the seeded users unchanged', async () => {
     const agent = await loginAs(testApp.app, 'carla.ruiz');
 

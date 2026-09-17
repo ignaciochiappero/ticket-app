@@ -3,7 +3,9 @@ import { APP_PIPE } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
+import { CountersModule } from './counters/counters.module.js';
 import { DocsController } from './docs.controller.js';
+import { TicketsModule } from './tickets/tickets.module.js';
 import { UsersModule } from './users/users.module.js';
 
 @Module({
@@ -16,6 +18,8 @@ import { UsersModule } from './users/users.module.js';
     AuthModule,
     UsersModule,
     CategoriesModule,
+    CountersModule,
+    TicketsModule,
   ],
   controllers: [DocsController],
   providers: [

@@ -65,12 +65,20 @@ describe('openapi (e2e)', () => {
 
     expect(operations.sort()).toEqual([
       'delete /categories/{id}',
+      'delete /tickets/{id}',
       'get /auth/me',
       'get /categories',
+      'get /tickets',
+      'get /tickets/{id}',
       'get /users',
       'patch /categories/{id}',
+      'patch /tickets/{id}',
       'post /auth/login',
       'post /categories',
+      'post /tickets',
+      'post /tickets/{id}/release',
+      'post /tickets/{id}/resolve',
+      'post /tickets/{id}/take',
     ]);
   });
 });

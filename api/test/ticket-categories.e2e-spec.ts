@@ -1,6 +1,3 @@
-import { getModelToken } from '@nestjs/mongoose';
-import type { Model } from 'mongoose';
-import { Category } from '../src/categories/category.schema.js';
 import { loginAs, type SessionClient } from './auth.js';
 import { createTestApp, type TestApp } from './create-test-app.js';
 
@@ -47,6 +44,19 @@ describe('ticket-categories (e2e)', () => {
 
   function names(page: CategoryPage): string[] {
     return page.items.map((category) => category.name);
+  }
+
+  async function openTicket(inCategory: string): Promise<string> {
+    const requester = await loginAs(testApp.app, REQUESTER);
+    const { body } = await requester
+      .post('/tickets')
+      .send({
+        title: 'Printer jammed',
+        description: 'On floor 3',
+        categoryId: inCategory,
+      })
+      .expect(201);
+    return (body as { id: string }).id;
   }
 
   async function categoryId(name: string): Promise<string> {
@@ -179,15 +189,9 @@ describe('ticket-categories (e2e)', () => {
     await api.delete(`/categories/${MISSING_ID}`).expect(404);
   });
 
-  it('A category marked as used cannot be renamed or deleted', async () => {
+  it('A category currently assigned to a ticket cannot be edited or deleted', async () => {
     const hardwareId = await categoryId('Hardware');
-    const categoryModel = testApp.app.get<Model<Category>>(
-      getModelToken(Category.name),
-    );
-    await categoryModel.updateOne(
-      { _id: hardwareId },
-      { $set: { used: true } },
-    );
+    await openTicket(hardwareId);
 
     await api
       .patch(`/categories/${hardwareId}`)
@@ -200,6 +204,64 @@ describe('ticket-categories (e2e)', () => {
       name: 'Hardware',
       used: true,
     });
+  });
+
+  it('A category previously assigned to an edited ticket remains locked', async () => {
+    const hardwareId = await categoryId('Hardware');
+    const accessId = await categoryId('Access');
+    const ticketId = await openTicket(hardwareId);
+
+    const requester = await loginAs(testApp.app, REQUESTER);
+    await requester
+      .patch(`/tickets/${ticketId}`)
+      .send({ categoryId: accessId })
+      .expect(200);
+
+    // No ticket points at Hardware any more, and it stays locked anyway: the
+    // history still names it, and a rename would rewrite the past.
+    await api
+      .patch(`/categories/${hardwareId}`)
+      .send({ name: 'Devices' })
+      .expect(409);
+    await api.delete(`/categories/${hardwareId}`).expect(409);
+    // The new one is locked too, from the moment the edit pointed at it.
+    await api.delete(`/categories/${accessId}`).expect(409);
+  });
+
+  it('A category assigned to a soft-deleted ticket remains locked', async () => {
+    const hardwareId = await categoryId('Hardware');
+    const ticketId = await openTicket(hardwareId);
+
+    const requester = await loginAs(testApp.app, REQUESTER);
+    await requester.delete(`/tickets/${ticketId}`).expect(204);
+
+    // The ticket is hidden, not gone: its history still refers to this category.
+    await api.delete(`/categories/${hardwareId}`).expect(409);
+  });
+
+  it('Deleting a category and creating a ticket in it never both succeed', async () => {
+    const accessId = await categoryId('Access');
+    const requester = await loginAs(testApp.app, REQUESTER);
+
+    const [deleted, created] = await Promise.allSettled([
+      api.delete(`/categories/${accessId}`),
+      requester.post('/tickets').send({
+        title: 'Racing the delete',
+        description: 'One of us has to lose',
+        categoryId: accessId,
+      }),
+    ]);
+
+    const status = (result: PromiseSettledResult<{ status: number }>) =>
+      result.status === 'fulfilled' ? result.value.status : 0;
+    const categoryGone = status(deleted) === 204;
+    const ticketExists = status(created) === 201;
+
+    // Both writes touch the same category document, so MongoDB serializes
+    // them: whichever lands first makes the other's filter match nothing.
+    expect(categoryGone).not.toBe(ticketExists);
+    const names = (await listCategories()).map((category) => category.name);
+    expect(names.includes('Access')).toBe(ticketExists);
   });
 
   it('Restarting the app does not bring back renamed or deleted starter categories', async () => {
