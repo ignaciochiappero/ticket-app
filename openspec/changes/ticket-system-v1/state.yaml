@@ -1,0 +1,26 @@
+change: ticket-system-v1
+artifact_store: openspec
+execution_mode: interactive
+delivery_strategy: one-branch-per-batch
+chain_strategy: stacked-to-main
+updated: 2026-09-17
+
+phases:
+  explore: skipped
+  proposal: approved
+  spec: approved
+  design: approved
+  tasks: done
+  apply: pending
+  verify: pending
+  archive: pending
+
+artifacts:
+  proposal: openspec/changes/ticket-system-v1/proposal.md
+  specs: openspec/changes/ticket-system-v1/specs/
+  design: openspec/changes/ticket-system-v1/design.md
+
+next_recommended:
+  - sdd-tasks
+
+awaiting: user approval of specs and design
