@@ -2,14 +2,14 @@
 
 ## Review Workload Forecast
 
-| Field | Value |
-|-------|-------|
-| Estimated changed lines | ~4,500-6,000 (additions + deletions) |
-| 400-line budget risk | High |
-| Chained PRs recommended | Yes, by size alone |
-| Suggested split | Single PR accepted under `size-exception`; the 6 work units below map to commits, not separate PRs |
-| Delivery strategy | exception-ok |
-| Chain strategy | size-exception |
+| Field                   | Value                                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| Estimated changed lines | ~4,500-6,000 (additions + deletions)                                                               |
+| 400-line budget risk    | High                                                                                               |
+| Chained PRs recommended | Yes, by size alone                                                                                 |
+| Suggested split         | Single PR accepted under `size-exception`; the 6 work units below map to commits, not separate PRs |
+| Delivery strategy       | exception-ok                                                                                       |
+| Chain strategy          | size-exception                                                                                     |
 
 Decision needed before apply: No
 Chained PRs recommended: Yes
@@ -20,14 +20,14 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 
 ### Suggested Work Units
 
-| Unit | Goal | Likely PR | Notes |
-|------|------|-----------|-------|
-| 1 | API foundation, users, categories | PR 1 (single) | Phases 1-2; base for everything else |
-| 2 | Ticket lifecycle + history (API) | PR 1 (single) | Phases 3-4; depends on Unit 1 |
-| 3 | Mandatory web (requester/agent views) | PR 1 (single) | Phase 5; cut-safe checkpoint - full product usable via UI |
-| 4 | Comments (API + web) | PR 1 (single) | Phase 6; optional, droppable |
-| 5 | Dashboard (API + web) | PR 1 (single) | Phase 7; optional, droppable |
-| 6 | Verification + delivery docs | PR 1 (single) | Phases 8-9; gates the final commit |
+| Unit | Goal                                  | Likely PR     | Notes                                                     |
+| ---- | ------------------------------------- | ------------- | --------------------------------------------------------- |
+| 1    | API foundation, users, categories     | PR 1 (single) | Phases 1-2; base for everything else                      |
+| 2    | Ticket lifecycle + history (API)      | PR 1 (single) | Phases 3-4; depends on Unit 1                             |
+| 3    | Mandatory web (requester/agent views) | PR 1 (single) | Phase 5; cut-safe checkpoint - full product usable via UI |
+| 4    | Comments (API + web)                  | PR 1 (single) | Phase 6; optional, droppable                              |
+| 5    | Dashboard (API + web)                 | PR 1 (single) | Phase 7; optional, droppable                              |
+| 6    | Verification + delivery docs          | PR 1 (single) | Phases 8-9; gates the final commit                        |
 
 **TDD convention**: every `RED→GREEN` task means write the failing test(s) named exactly as quoted, confirm they fail, implement the minimum to pass, then refactor before moving on (`strict_tdd: true`).
 
@@ -115,11 +115,11 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 
 Decided by the user: one branch and one PR per batch, created from `main` and merged in order. Batches are implemented one at a time, with a review before the next one starts; the user runs every git command.
 
-| Batch | Phases | Branch | Suggested commit |
-|-------|--------|--------|-------------------|
-| 1. API foundation, authentication and categories | 1-2 | `feat/api-foundation-categories` | already committed: dependencies, foundation, categories; then `feat(api): add login with bearer tokens` |
-| 2. Ticket lifecycle and history | 3-4 | `feat/api-ticket-lifecycle` | `feat(api): add ticket lifecycle with embedded audit history` |
-| 3. Mandatory web | 5 | `feat/web-ticket-views` | `feat(web): add switcher, requester/agent ticket views, and category admin` |
-| 4. Comments (optional) | 6 | `feat/ticket-comments` | `feat: add ticket comments end to end` |
-| 5. Dashboard (optional) | 7 | `feat/support-dashboard` | `feat: add support dashboard metrics end to end` |
-| 6. Delivery and docs | 8-9 | `docs/delivery` | `docs: add README, DECISIONS, and finish AI usage log` |
+| Batch                                            | Phases | Branch                           | Suggested commit                                                                                        |
+| ------------------------------------------------ | ------ | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 1. API foundation, authentication and categories | 1-2    | `feat/api-foundation-categories` | already committed: dependencies, foundation, categories; then `feat(api): add login with bearer tokens` |
+| 2. Ticket lifecycle and history                  | 3-4    | `feat/api-ticket-lifecycle`      | `feat(api): add ticket lifecycle with embedded audit history`                                           |
+| 3. Mandatory web                                 | 5      | `feat/web-ticket-views`          | `feat(web): add switcher, requester/agent ticket views, and category admin`                             |
+| 4. Comments (optional)                           | 6      | `feat/ticket-comments`           | `feat: add ticket comments end to end`                                                                  |
+| 5. Dashboard (optional)                          | 7      | `feat/support-dashboard`         | `feat: add support dashboard metrics end to end`                                                        |
+| 6. Delivery and docs                             | 8-9    | `docs/delivery`                  | `docs: add README, DECISIONS, and finish AI usage log`                                                  |

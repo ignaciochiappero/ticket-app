@@ -18,16 +18,16 @@
 
 ### Out of Scope
 
-| Item | Why not now |
-|---|---|
-| SLA by priority | A time target needs a measured baseline; the dashboard provides it for a later phase |
-| Notifications | Need an email provider or real-time infrastructure and complicate the local run; requesters already see status in their view |
-| Attachments | Among the costliest (storage, size limits, per-file access control); links in the description cover the need |
-| Reassignment | One support team: take plus release covers it; relevant once there are several support areas |
-| Search and filters | The queue is enough at this organization's volume |
-| Automatic categorization | Agents curate categories and requesters pick one; AI does not address the main pain |
-| Reopen | A recurring problem becomes a new ticket, so each ticket has one resolution and one unambiguous time to resolve |
-| User management (sign-up, password change, account recovery) | Not part of the stated problem; seeded users with demo credentials cover v1 |
+| Item                                                         | Why not now                                                                                                                  |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| SLA by priority                                              | A time target needs a measured baseline; the dashboard provides it for a later phase                                         |
+| Notifications                                                | Need an email provider or real-time infrastructure and complicate the local run; requesters already see status in their view |
+| Attachments                                                  | Among the costliest (storage, size limits, per-file access control); links in the description cover the need                 |
+| Reassignment                                                 | One support team: take plus release covers it; relevant once there are several support areas                                 |
+| Search and filters                                           | The queue is enough at this organization's volume                                                                            |
+| Automatic categorization                                     | Agents curate categories and requesters pick one; AI does not address the main pain                                          |
+| Reopen                                                       | A recurring problem becomes a new ticket, so each ticket has one resolution and one unambiguous time to resolve              |
+| User management (sign-up, password change, account recovery) | Not part of the stated problem; seeded users with demo credentials cover v1                                                  |
 
 ## Product Rules
 
@@ -43,15 +43,15 @@
 
 `open` →take→ `in_progress` →resolve→ `resolved` (final) · `in_progress` →release→ `open`
 
-| Action | Who | Only when | Result |
-|---|---|---|---|
-| Create | Any requester | The category exists | `open`, unassigned |
-| Edit title, description, category | Ticket's requester | `open` | Fields updated |
-| Delete | Ticket's requester | `open` | Soft deleted: hidden everywhere, kept in the database |
-| Take | Any agent | `open` and unassigned | `in_progress`, assigned to that agent; if agents take it at the same time, exactly one succeeds |
-| Release to queue | Assigned agent | `in_progress` | `open`, unassigned; any agent can take it again (not reassignment) |
-| Resolve | Assigned agent | `in_progress` | `resolved` |
-| Comment | Ticket's requester, or any agent | Not `resolved` | Shown in the ticket timeline |
+| Action                            | Who                              | Only when             | Result                                                                                          |
+| --------------------------------- | -------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------- |
+| Create                            | Any requester                    | The category exists   | `open`, unassigned                                                                              |
+| Edit title, description, category | Ticket's requester               | `open`                | Fields updated                                                                                  |
+| Delete                            | Ticket's requester               | `open`                | Soft deleted: hidden everywhere, kept in the database                                           |
+| Take                              | Any agent                        | `open` and unassigned | `in_progress`, assigned to that agent; if agents take it at the same time, exactly one succeeds |
+| Release to queue                  | Assigned agent                   | `in_progress`         | `open`, unassigned; any agent can take it again (not reassignment)                              |
+| Resolve                           | Assigned agent                   | `in_progress`         | `resolved`                                                                                      |
+| Comment                           | Ticket's requester, or any agent | Not `resolved`        | Shown in the ticket timeline                                                                    |
 
 - Every action above records a history event with who, what, and when; edits record previous and new values.
 - Agents see the history of any ticket; requesters only of their own.
@@ -93,25 +93,25 @@ None; `openspec/specs/` has no specs yet.
 
 ## Affected Areas
 
-| Area | Impact | Description |
-|---|---|---|
-| `api/src/` | New | Feature modules, authentication, seed |
-| `api/src/app.module.ts` | Modified | Registers the feature modules |
-| `api/test/` | New | e2e tests: concurrent take, authorization, category lock |
-| `web/src/` | New/Modified | Login, requester and agent views, back office, dashboard (`App.tsx` becomes the shell) |
-| `compose.yaml` | Modified if needed | Web-to-API wiring or seed |
-| `README.md`, `.agents/context/`, `AGENTS.md` | New/Modified | Run steps and seeded users; domain, decisions, data model (AGENTS.md sync rule) |
+| Area                                         | Impact             | Description                                                                            |
+| -------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------- |
+| `api/src/`                                   | New                | Feature modules, authentication, seed                                                  |
+| `api/src/app.module.ts`                      | Modified           | Registers the feature modules                                                          |
+| `api/test/`                                  | New                | e2e tests: concurrent take, authorization, category lock                               |
+| `web/src/`                                   | New/Modified       | Login, requester and agent views, back office, dashboard (`App.tsx` becomes the shell) |
+| `compose.yaml`                               | Modified if needed | Web-to-API wiring or seed                                                              |
+| `README.md`, `.agents/context/`, `AGENTS.md` | New/Modified       | Run steps and seeded users; domain, decisions, data model (AGENTS.md sync rule)        |
 
 ## Risks
 
-| Risk | Likelihood | Mitigation |
-|---|---|---|
-| Single-day delivery | High | Closed scope; build mandatory capabilities first and optional ones last, so a cut drops only optional work |
-| Races on one ticket or category: two takes, edit vs take, comment vs resolve, category delete vs ticket create | Med | Each action is one conditional write; e2e test with parallel takes |
-| History out of sync with ticket state | Med | The event is saved in the same write as the change; tests expect one event per action |
-| Authorization enforced only in the UI | Med | Tests call the API with the wrong role and the wrong owner |
-| Credentials or signing secrets committed to the repo | Med | Only password hashes are stored; demo passwords are documented as demo-only; the JWT secret comes from `JWT_SECRET` or is generated at startup, never committed |
-| Works in dev, fails under Docker (API URL, CORS, seed) | Med | Run `docker compose up --build` end to end before delivery |
+| Risk                                                                                                           | Likelihood | Mitigation                                                                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single-day delivery                                                                                            | High       | Closed scope; build mandatory capabilities first and optional ones last, so a cut drops only optional work                                                      |
+| Races on one ticket or category: two takes, edit vs take, comment vs resolve, category delete vs ticket create | Med        | Each action is one conditional write; e2e test with parallel takes                                                                                              |
+| History out of sync with ticket state                                                                          | Med        | The event is saved in the same write as the change; tests expect one event per action                                                                           |
+| Authorization enforced only in the UI                                                                          | Med        | Tests call the API with the wrong role and the wrong owner                                                                                                      |
+| Credentials or signing secrets committed to the repo                                                           | Med        | Only password hashes are stored; demo passwords are documented as demo-only; the JWT secret comes from `JWT_SECRET` or is generated at startup, never committed |
+| Works in dev, fails under Docker (API URL, CORS, seed)                                                         | Med        | Run `docker compose up --build` end to end before delivery                                                                                                      |
 
 ## Rollback Plan
 
