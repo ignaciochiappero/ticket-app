@@ -4,7 +4,7 @@
 
 ### Requirement: Audit Event Recording
 
-Every lifecycle action (create, edit, soft delete, take, release, resolve) and every comment MUST record a history event with who performed it, what it was, and when. An edit's event MUST record the previous and new values of each changed field.
+Every lifecycle action (create, edit, soft delete, take, release, resolve) and every comment MUST record a history event with who performed it, what it was, and when. The event MUST identify the person by name, not only by id. An edit's event MUST record the previous and new values of each changed field.
 
 #### Scenario: Every lifecycle action records exactly one history event
 

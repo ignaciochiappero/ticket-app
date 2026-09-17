@@ -4,7 +4,7 @@
 
 ### Requirement: Ticket Creation
 
-Any requester MUST be able to create a ticket with a title, description, and an existing category.
+Any requester MUST be able to create a ticket with a title, description, and an existing category. Every ticket MUST receive a short code, unique and readable, that people can use to refer to it.
 
 #### Scenario: Requester creates a ticket in an existing category
 
@@ -106,7 +106,7 @@ The assigned agent MUST be able to resolve an `in_progress` ticket to `resolved`
 
 ### Requirement: Ticket Lists
 
-A requester MUST see only tickets they created. An agent MUST see all non-deleted tickets, grouped by state (`open` first), with assignees.
+A requester MUST see only tickets they created. An agent MUST see every non-deleted ticket. Both see one board, one page at a time; the `ticket-search` delta owns its filters, sorting and default states.
 
 #### Scenario: Requester's ticket list shows only tickets they created
 
@@ -114,7 +114,7 @@ A requester MUST see only tickets they created. An agent MUST see all non-delete
 - WHEN one requester lists their tickets
 - THEN only tickets that requester created are shown
 
-#### Scenario: Agent's ticket list shows all tickets grouped by state with each ticket's assignee
+#### Scenario: Agent's board shows every ticket with its state and assignee
 
 - GIVEN tickets in different states from different requesters
 - WHEN an agent lists tickets

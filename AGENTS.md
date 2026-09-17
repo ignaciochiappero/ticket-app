@@ -31,7 +31,7 @@ You are a senior engineer with many years of experience and a mentor who enjoys 
 
 - pnpm 11, Node 22, Docker Compose
 - `api/`: NestJS 12 (ESM: relative imports end in `.js`), Mongoose 9, MongoDB 8, Swagger (OpenAPI), Vitest, oxlint
-- `web/`: React 19, Vite 8, TypeScript 6, Tailwind CSS 4, Vitest with Testing Library (jsdom), oxlint
+- `web/`: React 19, Vite 8, TypeScript 6, Tailwind CSS 4, React Router, shadcn/ui, Vitest with Testing Library (jsdom), oxlint
 
 Your training data may predate these versions. Check the installed code or the official docs before using an API.
 
@@ -51,7 +51,7 @@ API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/do
 
 ## API structure
 
-- `api/src/` is organized by feature (`users/`, `categories/`, `tickets/`, `dashboard/`), not by technical layer. Cross-cutting concerns get their own folder: `auth/` owns login, password hashing and the token guard, and is the only place to change for SSO.
+- `api/src/` is organized by feature (`users/`, `categories/`, `tickets/`), not by technical layer. Cross-cutting concerns get their own folder: `auth/` owns login, password hashing and the token guard, and is the only place to change for SSO.
 - Inside a feature, one responsibility per file, named by suffix: `*.schema.ts` (MongoDB), `*.service.ts` (business rules and queries), `*.controller.ts` (HTTP routes), `*.seed.ts` (startup data owned by the feature), `*.module.ts` (Nest wiring), `*.spec.ts` (unit tests).
 - DTOs (the API contract) live in the feature's `dto/` folder, one class per file: `dto/category.dto.ts`, `dto/save-category.dto.ts`. Design every feature as one that will grow.
 
@@ -70,7 +70,8 @@ API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/do
 - Code, identifiers and comments are in English.
 - Document every endpoint for someone testing it from `/docs`. The Swagger CLI plugin runs with `introspectComments`, so write a JSDoc summary on each route and a JSDoc description plus `@example` on each DTO property. Add `@ApiTags` per controller, `@ApiParam` (description and example) for path parameters, and `@Api*Response` decorators for error codes.
 - pnpm blocks dependency build scripts. When a new dependency needs one, allow or deny it explicitly with `allowBuilds` in that project's `pnpm-workspace.yaml`.
-- Style the web app with Tailwind utility classes. Do not add CSS files.
+- Style the web app with Tailwind utility classes and shadcn/ui components, which the CLI copies into `web/src/components/ui/` and which are ours to edit from then on. Do not add CSS files.
+- Board state (filters, sorting, page) lives in the URL, not in component state, so a filtered board is a link. Filtering, sorting and paging are the API's job; the web never narrows a list it already fetched, and never queries while the person is typing.
 
 ## Skills
 
