@@ -39,14 +39,14 @@ Your training data may predate these versions. Check the installed code or the o
 
 API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/docs-json`.
 
-| Task                                          | Command                     |
-| --------------------------------------------- | --------------------------- |
-| Install everything                            | `pnpm install`              |
-| Full stack                                    | `docker compose up --build` |
-| Dev servers (MongoDB + API + web)             | `pnpm run dev`              |
-| Lint and unit tests (also runs on pre-commit) | `pnpm run check`            |
-| Format every file                             | `pnpm run format`           |
-| API e2e tests (needs MongoDB)                 | `pnpm -C api test:e2e`      |
+| Task                                           | Command                     |
+| ---------------------------------------------- | --------------------------- |
+| Install everything                             | `pnpm install`              |
+| Full stack                                     | `docker compose up --build` |
+| Dev servers (MongoDB + API + web)              | `pnpm run dev`              |
+| Format check, lint and unit tests (pre-commit) | `pnpm run check`            |
+| Format every file                              | `pnpm run format`           |
+| API e2e tests (needs MongoDB)                  | `pnpm -C api test:e2e`      |
 
 ## API structure
 

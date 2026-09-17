@@ -3,7 +3,7 @@
   "scripts": {
     "prepare": "husky",
     "dev": "docker compose up -d mongo && pnpm -r --parallel dev",
-    "check": "pnpm -r lint && pnpm -r test",
+    "check": "pnpm run format:check && pnpm -r lint && pnpm -r test",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
