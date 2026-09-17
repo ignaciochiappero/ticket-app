@@ -1,0 +1,13 @@
+msg=$(head -n1 "$1")
+
+if printf '%s\n' "$msg" | grep -Eq '^(Merge |Revert |(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(\(.+\))?!?: .+)'; then
+  printf '\033[32m✅ VALID COMMIT: %s\033[0m\n' "$msg"
+  exit 0
+fi
+
+printf '\033[31m❌ INVALID COMMIT: the message does not follow Conventional Commits.\n'
+printf '  Received: %s\n' "$msg"
+printf '  Expected: <type>(<optional scope>): <description>\n'
+printf '  Types:    feat, fix, docs, style, refactor, perf, test, build, ci, chore\n'
+printf '  Example:  feat(api): add tickets module\033[0m\n'
+exit 1
