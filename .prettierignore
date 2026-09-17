@@ -2,6 +2,7 @@ dist
 coverage
 pnpm-lock.yaml
 
-# Third-party skill files, recorded in skills-lock.json: they are not ours to reformat.
+# Third-party skill files and their lock file: they are not ours to reformat.
 .agents/skills
 .claude/skills
+skills-lock.json
