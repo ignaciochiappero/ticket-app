@@ -19,32 +19,32 @@ strict_tdd: true
 
 testing:
   test_runner:
-    command: "pnpm run check"
-    framework: "Vitest 4 (also runs on the husky pre-commit hook)"
+    command: 'pnpm run check'
+    framework: 'Vitest 4 (also runs on the husky pre-commit hook)'
   layers:
     unit:
       available: true
-      tool: "Vitest — api: **/*.spec.ts, web: **/*.test.tsx"
+      tool: 'Vitest — api: **/*.spec.ts, web: **/*.test.tsx'
     integration:
       available: true
-      tool: "web: @testing-library/react + jsdom"
+      tool: 'web: @testing-library/react + jsdom'
     e2e:
       available: true
-      tool: "api: Vitest, test/*.e2e-spec.ts (needs MongoDB running), run via `pnpm -C api test:e2e`"
+      tool: 'api: Vitest, test/*.e2e-spec.ts (needs MongoDB running), run via `pnpm -C api test:e2e`'
   coverage:
     available: true
-    command: "pnpm -C api test:cov"
-    note: "api only — @vitest/coverage-v8 is not installed in web"
+    command: 'pnpm -C api test:cov'
+    note: 'api only — @vitest/coverage-v8 is not installed in web'
   quality:
     linter:
       available: true
-      command: "pnpm -r lint (oxlint; api uses --type-aware)"
+      command: 'pnpm -r lint (oxlint; api uses --type-aware)'
     type_checker:
       available: true
-      command: "web: tsc -b (via pnpm -C web build); api: nest build"
+      command: 'web: tsc -b (via pnpm -C web build); api: nest build'
     formatter:
       available: true
-      command: "pnpm -C api format (prettier; web has no formatter script)"
+      command: 'pnpm -C api format (prettier; web has no formatter script)'
 
 rules:
   proposal:
@@ -63,10 +63,10 @@ rules:
     guidelines:
       - Follow existing patterns and AGENTS.md.
     tdd: true
-    test_command: "pnpm run check"
+    test_command: 'pnpm run check'
   verify:
-    test_command: "pnpm run check"
-    build_command: "pnpm -r build"
+    test_command: 'pnpm run check'
+    build_command: 'pnpm -r build'
     coverage_threshold: 0
   archive:
     - Warn before merging destructive deltas.

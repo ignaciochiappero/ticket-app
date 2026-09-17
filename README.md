@@ -23,13 +23,15 @@ Everything, database included, with one command:
 docker compose up --build
 ```
 
+With the dependencies installed, `pnpm run start` runs the same thing and `pnpm run stop` brings it down.
+
 | Service               | URL                        |
 | --------------------- | -------------------------- |
 | Web app               | http://localhost:5173      |
 | API                   | http://localhost:3000      |
 | API docs (Swagger UI) | http://localhost:3000/docs |
 
-To stop it: `docker compose down`. The MongoDB data lives in a volume and survives restarts; `docker compose down -v` removes it and gives you a clean database.
+To stop it: `docker compose down` (or `pnpm run stop`). The MongoDB data lives in a volume and survives restarts; `docker compose down -v` removes it and gives you a clean database.
 
 ## Run it for development
 

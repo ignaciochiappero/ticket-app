@@ -72,9 +72,6 @@ importers:
       oxlint-tsgolint:
         specifier: ^7.0.2001
         version: 7.0.2001
-      prettier:
-        specifier: ^3.4.2
-        version: 3.9.6
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -3541,7 +3538,8 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  prettier@3.9.6: {}
+  prettier@3.9.6:
+    optional: true
 
   proxy-addr@2.0.8:
     dependencies:

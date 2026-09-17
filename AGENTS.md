@@ -39,13 +39,15 @@ Your training data may predate these versions. Check the installed code or the o
 
 API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/docs-json`.
 
-| Task | Command |
-| --- | --- |
-| Install everything | `pnpm install` |
-| Full stack | `docker compose up --build` |
-| Dev servers (MongoDB + API + web) | `pnpm run dev` |
-| Lint and unit tests (also runs on pre-commit) | `pnpm run check` |
-| API e2e tests (needs MongoDB) | `pnpm -C api test:e2e` |
+| Task                                           | Command                |
+| ---------------------------------------------- | ---------------------- |
+| Install everything                             | `pnpm install`         |
+| Full stack in Docker                           | `pnpm run start`       |
+| Stop it                                        | `pnpm run stop`        |
+| Dev servers (MongoDB + API + web)              | `pnpm run dev`         |
+| Format check, lint and unit tests (pre-commit) | `pnpm run check`       |
+| Format every file                              | `pnpm run format`      |
+| API e2e tests (needs MongoDB)                  | `pnpm -C api test:e2e` |
 
 ## API structure
 
@@ -56,6 +58,7 @@ API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/do
 ## API conventions
 
 - `POST /auth/login` returns `{ token }`, a signed JWT with the user's id and role and nothing else. Clients send it as `Authorization: Bearer <token>`, and ask `GET /auth/me` for the name and role instead of decoding it. `AuthGuard` is global, so routes are protected by default: opt out with `@Public()`, restrict roles with `@Roles()`, read the user with `@CurrentUser()`, and declare `@ApiBearerAuth()` on guarded controllers. There is no session state and no logout endpoint: logging out is the client discarding its token.
+- Lists that can grow are paginated: the route takes `PaginationQueryDto` (`?page=&limit=`, default 20, maximum 100, invalid values rejected with 400) and answers with a class that extends `PaginatedDto`, so the body is `{ items, total, page, limit }`. Build the query with `resolvePage()` and count with the same filter as the page. Every paginated query needs a deterministic total order, or a record can land on two pages. Fixed reference lists, such as `GET /users`, return every record instead; a screen that needs a whole growing list asks for `?limit=100`.
 - Ownership checks (for example, "this ticket belongs to you") live in services, because they need the resource.
 - E2E tests boot the app with `test/create-test-app.ts`, which gives each test file its own database and drops it on close. Get a logged-in client with `loginAs(app, username)` from `test/auth.ts`.
 

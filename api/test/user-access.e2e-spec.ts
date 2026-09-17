@@ -96,8 +96,8 @@ describe('user-access (e2e)', () => {
     await requester.post('/categories').send({ name: 'Printers' }).expect(403);
 
     const response = await requester.get('/categories').expect(200);
-    const names = (response.body as { name: string }[]).map((c) => c.name);
-    expect(names).not.toContain('Printers');
+    const { items } = response.body as { items: { name: string }[] };
+    expect(items.map((category) => category.name)).not.toContain('Printers');
   });
 
   it('Restarting the app keeps the seeded users unchanged', async () => {

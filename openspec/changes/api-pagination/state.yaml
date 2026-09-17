@@ -1,0 +1,27 @@
+change: api-pagination
+artifact_store: openspec
+execution_mode: interactive
+delivery_strategy: one-branch-per-batch
+chain_strategy: stacked-to-main
+updated: 2026-09-17
+
+phases:
+  explore: skipped
+  proposal: pending
+  spec: pending
+  design: pending
+  tasks: pending
+  apply: pending
+  verify: pending
+  archive: pending
+
+artifacts:
+  proposal: openspec/changes/api-pagination/proposal.md
+  specs: openspec/changes/api-pagination/specs/
+  design: openspec/changes/api-pagination/design.md
+  tasks: openspec/changes/api-pagination/tasks.md
+
+next_recommended:
+  - sdd-apply
+
+awaiting: user approval of the proposal, spec and design before any code is written

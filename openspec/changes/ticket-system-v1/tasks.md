@@ -2,14 +2,14 @@
 
 ## Review Workload Forecast
 
-| Field | Value |
-|-------|-------|
-| Estimated changed lines | ~4,500-6,000 (additions + deletions) |
-| 400-line budget risk | High |
-| Chained PRs recommended | Yes, by size alone |
-| Suggested split | Single PR accepted under `size-exception`; the 6 work units below map to commits, not separate PRs |
-| Delivery strategy | exception-ok |
-| Chain strategy | size-exception |
+| Field                   | Value                                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| Estimated changed lines | ~4,500-6,000 (additions + deletions)                                                               |
+| 400-line budget risk    | High                                                                                               |
+| Chained PRs recommended | Yes, by size alone                                                                                 |
+| Suggested split         | Single PR accepted under `size-exception`; the 6 work units below map to commits, not separate PRs |
+| Delivery strategy       | exception-ok                                                                                       |
+| Chain strategy          | size-exception                                                                                     |
 
 Decision needed before apply: No
 Chained PRs recommended: Yes
@@ -20,14 +20,14 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 
 ### Suggested Work Units
 
-| Unit | Goal | Likely PR | Notes |
-|------|------|-----------|-------|
-| 1 | API foundation, users, categories | PR 1 (single) | Phases 1-2; base for everything else |
-| 2 | Ticket lifecycle + history (API) | PR 1 (single) | Phases 3-4; depends on Unit 1 |
-| 3 | Mandatory web (requester/agent views) | PR 1 (single) | Phase 5; cut-safe checkpoint - full product usable via UI |
-| 4 | Comments (API + web) | PR 1 (single) | Phase 6; optional, droppable |
-| 5 | Dashboard (API + web) | PR 1 (single) | Phase 7; optional, droppable |
-| 6 | Verification + delivery docs | PR 1 (single) | Phases 8-9; gates the final commit |
+| Unit | Goal                                  | Likely PR     | Notes                                                     |
+| ---- | ------------------------------------- | ------------- | --------------------------------------------------------- |
+| 1    | API foundation, users, categories     | PR 1 (single) | Phases 1-2; base for everything else                      |
+| 2    | Ticket lifecycle + history (API)      | PR 1 (single) | Phases 3-4; depends on Unit 1                             |
+| 3    | Mandatory web (requester/agent views) | PR 1 (single) | Phase 5; cut-safe checkpoint - full product usable via UI |
+| 4    | Comments (API + web)                  | PR 1 (single) | Phase 6; optional, droppable                              |
+| 5    | Dashboard (API + web)                 | PR 1 (single) | Phase 7; optional, droppable                              |
+| 6    | Verification + delivery docs          | PR 1 (single) | Phases 8-9; gates the final commit                        |
 
 **TDD convention**: every `RED→GREEN` task means write the failing test(s) named exactly as quoted, confirm they fail, implement the minimum to pass, then refactor before moving on (`strict_tdd: true`).
 
@@ -106,7 +106,7 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 ## Phase 9: Delivery Documentation
 
 - [x] 9.1 `README.md`: Docker and dev run steps, 4 requester + 4 agent seeded users with their usernames and the demo password, 4 starter categories, Swagger at `/docs`. Written early, on the user's call; the Status section and the environment table need a final pass once the web app lands (8.x).
-- [ ] 9.2 `DECISIONS.md`: data model and why (design sections 2, 11); ticket state machine and why those states (design section 3, proposal lifecycle table); optional features discarded and the selection criteria (proposal Out of Scope table); what breaks or gets redesigned at 50,000 tickets/month and 5 support areas (design section 11 subsection); conscious technical debt (category over-locking on failed writes, no transactions, manual zod/class-validator limit mirroring, no pagination or extra indexes, demo credentials in the seed, a role that stays valid until the token expires with no refresh or revocation, no server-side logout, and the token in `localStorage`).
+- [ ] 9.2 `DECISIONS.md`: data model and why (design sections 2, 11); ticket state machine and why those states (design section 3, proposal lifecycle table); optional features discarded and the selection criteria (proposal Out of Scope table); what breaks or gets redesigned at 50,000 tickets/month and 5 support areas (design section 11 subsection); conscious technical debt (category over-locking on failed writes, no transactions, manual zod/class-validator limit mirroring, offset pagination whose deep pages degrade because `skip` walks the skipped documents, with a cursor on the sort key as the migration, no extra indexes beyond the requester list, demo credentials in the seed, a role that stays valid until the token expires with no refresh or revocation, no server-side logout, and the token in `localStorage`).
 - [ ] 9.3 `DECISIONS.md` Quality Strategy section: what's tested and how (design section 9 table), what's not (browser/visual e2e, load beyond the 4-agent race), and prioritization rationale (concurrency and authorization first, per proposal Risks table).
 - [ ] 9.4 Throughout apply: append a one-line `## Log` entry to `AI-USAGE.md` for each rejected/corrected decision (skip minor wording, per AGENTS.md rule). At delivery, finish `## What I fully delegated` / `## Where I intervened and why` / `## AI output I rejected` for the implementation phase - do not rewrite existing planning-phase content.
 - [ ] 9.5 Update `AGENTS.md` (module structure, e2e per-test-database note, pointer to `DECISIONS.md`); create `.agents/context/domain.md` and `.agents/context/data-model.md`.
@@ -115,11 +115,11 @@ The user already accepted `size-exception` for this change: 4 API modules, 3 col
 
 Decided by the user: one branch and one PR per batch, created from `main` and merged in order. Batches are implemented one at a time, with a review before the next one starts; the user runs every git command.
 
-| Batch | Phases | Branch | Suggested commit |
-|-------|--------|--------|-------------------|
-| 1. API foundation, authentication and categories | 1-2 | `feat/api-foundation-categories` | already committed: dependencies, foundation, categories; then `feat(api): add login with bearer tokens` |
-| 2. Ticket lifecycle and history | 3-4 | `feat/api-ticket-lifecycle` | `feat(api): add ticket lifecycle with embedded audit history` |
-| 3. Mandatory web | 5 | `feat/web-ticket-views` | `feat(web): add switcher, requester/agent ticket views, and category admin` |
-| 4. Comments (optional) | 6 | `feat/ticket-comments` | `feat: add ticket comments end to end` |
-| 5. Dashboard (optional) | 7 | `feat/support-dashboard` | `feat: add support dashboard metrics end to end` |
-| 6. Delivery and docs | 8-9 | `docs/delivery` | `docs: add README, DECISIONS, and finish AI usage log` |
+| Batch                                            | Phases | Branch                           | Suggested commit                                                                                        |
+| ------------------------------------------------ | ------ | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 1. API foundation, authentication and categories | 1-2    | `feat/api-foundation-categories` | already committed: dependencies, foundation, categories; then `feat(api): add login with bearer tokens` |
+| 2. Ticket lifecycle and history                  | 3-4    | `feat/api-ticket-lifecycle`      | `feat(api): add ticket lifecycle with embedded audit history`                                           |
+| 3. Mandatory web                                 | 5      | `feat/web-ticket-views`          | `feat(web): add switcher, requester/agent ticket views, and category admin`                             |
+| 4. Comments (optional)                           | 6      | `feat/ticket-comments`           | `feat: add ticket comments end to end`                                                                  |
+| 5. Dashboard (optional)                          | 7      | `feat/support-dashboard`         | `feat: add support dashboard metrics end to end`                                                        |
+| 6. Delivery and docs                             | 8-9    | `docs/delivery`                  | `docs: add README, DECISIONS, and finish AI usage log`                                                  |
