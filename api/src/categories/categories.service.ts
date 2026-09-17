@@ -5,8 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model, Types } from 'mongoose';
+import type { PaginationQueryDto } from '../pagination/dto/pagination-query.dto.js';
+import { resolvePage } from '../pagination/pagination.js';
 import { Category, CATEGORY_NAME_COLLATION } from './category.schema.js';
 import type { CategoryDto } from './dto/category.dto.js';
+import type { PaginatedCategoriesDto } from './dto/paginated-categories.dto.js';
 import type { SaveCategoryDto } from './dto/save-category.dto.js';
 
 type CategoryRecord = Category & { _id: Types.ObjectId };
@@ -18,13 +21,21 @@ export class CategoriesService {
     private readonly categoryModel: Model<Category>,
   ) {}
 
-  async findAll(): Promise<CategoryDto[]> {
-    const categories = await this.categoryModel
-      .find()
-      .collation(CATEGORY_NAME_COLLATION)
-      .sort({ name: 1 })
-      .lean();
-    return categories.map(toCategoryDto);
+  // Names are unique, so sorting by name is a total order and no category can land
+  // on two pages. The count uses the same (empty) filter as the page it describes.
+  async findAll(query: PaginationQueryDto): Promise<PaginatedCategoriesDto> {
+    const { page, limit, skip } = resolvePage(query);
+    const [categories, total] = await Promise.all([
+      this.categoryModel
+        .find()
+        .collation(CATEGORY_NAME_COLLATION)
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.categoryModel.countDocuments(),
+    ]);
+    return { items: categories.map(toCategoryDto), total, page, limit };
   }
 
   async create({ name }: SaveCategoryDto): Promise<CategoryDto> {

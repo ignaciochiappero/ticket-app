@@ -10,6 +10,15 @@ interface CategoryResponse {
   used: boolean;
 }
 
+interface CategoryPage {
+  items: CategoryResponse[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const STARTERS = ['Access', 'Hardware', 'Other', 'Software'];
+
 const AGENT = 'carla.ruiz';
 const REQUESTER = 'lucia.fernandez';
 const MISSING_ID = '64b7f0c2a1b2c3d4e5f60718';
@@ -27,9 +36,17 @@ describe('ticket-categories (e2e)', () => {
     await testApp.close();
   });
 
+  async function listPage(query = ''): Promise<CategoryPage> {
+    const response = await api.get(`/categories${query}`).expect(200);
+    return response.body as CategoryPage;
+  }
+
   async function listCategories(): Promise<CategoryResponse[]> {
-    const response = await api.get('/categories').expect(200);
-    return response.body as CategoryResponse[];
+    return (await listPage()).items;
+  }
+
+  function names(page: CategoryPage): string[] {
+    return page.items.map((category) => category.name);
   }
 
   async function categoryId(name: string): Promise<string> {
@@ -61,6 +78,45 @@ describe('ticket-categories (e2e)', () => {
       'Hardware',
       'Software',
     ]);
+  });
+
+  it('A list returns the first page by default', async () => {
+    const page = await listPage();
+
+    expect(page).toMatchObject({ total: 4, page: 1, limit: 20 });
+    expect(names(page)).toEqual(STARTERS);
+  });
+
+  it('A client can ask for a specific page and size', async () => {
+    const page = await listPage('?page=2&limit=2');
+
+    // The total counts every match, not the two returned, so the client can size the pager.
+    expect(page).toMatchObject({ total: 4, page: 2, limit: 2 });
+    expect(names(page)).toEqual(['Other', 'Software']);
+  });
+
+  it('A page past the end is empty', async () => {
+    const page = await listPage('?page=99');
+
+    expect(page.items).toEqual([]);
+    expect(page.total).toBe(4);
+  });
+
+  it('An invalid page or size is rejected', async () => {
+    await api.get('/categories?page=0').expect(400);
+    await api.get('/categories?limit=0').expect(400);
+    await api.get('/categories?limit=101').expect(400);
+    await api.get('/categories?page=abc').expect(400);
+    await api.get('/categories?page=1.5').expect(400);
+  });
+
+  it('Paging through a list yields every record exactly once', async () => {
+    const first = await listPage('?page=1&limit=3');
+    const second = await listPage('?page=2&limit=3');
+
+    const walked = [...names(first), ...names(second)];
+    expect(walked).toEqual(STARTERS);
+    expect(new Set(walked).size).toBe(STARTERS.length);
   });
 
   it('Requester cannot create a category', async () => {
@@ -158,7 +214,7 @@ describe('ticket-categories (e2e)', () => {
       // A restart signs sessions with a new secret, so this app needs its own login.
       const restartedApi = await loginAs(restarted.app, AGENT);
       const response = await restartedApi.get('/categories').expect(200);
-      expect((response.body as CategoryResponse[]).map((c) => c.name)).toEqual([
+      expect(names(response.body as CategoryPage)).toEqual([
         'General',
         'Hardware',
         'Software',

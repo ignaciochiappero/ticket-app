@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { IsObjectIdPipe } from '@nestjs/mongoose';
 import {
@@ -20,8 +21,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Roles } from '../auth/auth.decorators.js';
+import { PaginationQueryDto } from '../pagination/dto/pagination-query.dto.js';
 import { CategoriesService } from './categories.service.js';
 import { CategoryDto } from './dto/category.dto.js';
+import { PaginatedCategoriesDto } from './dto/paginated-categories.dto.js';
 import { SaveCategoryDto } from './dto/save-category.dto.js';
 
 const CATEGORY_ID_PARAM = {
@@ -37,10 +40,11 @@ const CATEGORY_ID_PARAM = {
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  /** List all categories sorted by name (any user) */
+  /** List the categories one page at a time, sorted by name (any user) */
   @Get()
-  findAll(): Promise<CategoryDto[]> {
-    return this.categoriesService.findAll();
+  @ApiBadRequestResponse({ description: 'Invalid page or limit' })
+  findAll(@Query() query: PaginationQueryDto): Promise<PaginatedCategoriesDto> {
+    return this.categoriesService.findAll(query);
   }
 
   /** Create a category (agents only) */
