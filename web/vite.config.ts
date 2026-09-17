@@ -14,5 +14,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    // One jsdom environment per worker is expensive. Left unbounded, vitest
+    // spawns one per core, and on a machine that is short of memory the OS
+    // kills the extras: the run then reports "passed" for the files that did
+    // run and says nothing about the ones that never started.
+    maxWorkers: 4,
   },
 });
