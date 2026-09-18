@@ -31,13 +31,13 @@ describe('routes', () => {
     renderAt('/');
 
     expect(screen.getByRole('heading', { name: 'Ticket App' })).toBeDefined();
-    expect(screen.getByRole('link', { name: 'Sign in' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Ingresar' })).toBeDefined();
   });
 
   it('sends a visitor with no session to the login screen', () => {
     renderAt('/tickets');
 
-    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeDefined();
+    expect(screen.getByRole('heading', { name: 'Ingresar' })).toBeDefined();
   });
 
   it('shows the shell to a signed-in user', async () => {
@@ -51,7 +51,7 @@ describe('routes', () => {
     renderAt('/tickets');
 
     expect(await screen.findByText('Carla Ruiz')).toBeDefined();
-    expect(screen.getByRole('link', { name: 'Categories' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Categorías' })).toBeDefined();
   });
 
   it('hides the agent-only navigation from a requester', async () => {
@@ -65,7 +65,7 @@ describe('routes', () => {
     renderAt('/tickets');
 
     expect(await screen.findByText('Lucía Fernández')).toBeDefined();
-    expect(screen.queryByRole('link', { name: 'Categories' })).toBe(null);
+    expect(screen.queryByRole('link', { name: 'Categorías' })).toBe(null);
   });
 
   it('keeps a requester out of the agent-only back office', async () => {
@@ -82,12 +82,12 @@ describe('routes', () => {
     expect(
       await screen.findByRole('heading', { name: 'Tickets' }),
     ).toBeDefined();
-    expect(screen.queryByRole('heading', { name: 'Categories' })).toBe(null);
+    expect(screen.queryByRole('heading', { name: 'Categorías' })).toBe(null);
   });
 
   it('takes an unknown path back to the front door', () => {
     renderAt('/nowhere');
 
-    expect(screen.getByRole('link', { name: 'Sign in' })).toBeDefined();
+    expect(screen.getByRole('link', { name: 'Ingresar' })).toBeDefined();
   });
 });

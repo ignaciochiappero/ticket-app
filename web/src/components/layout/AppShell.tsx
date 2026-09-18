@@ -50,7 +50,7 @@ export function AppShell() {
             </NavItem>
             {user?.role === 'agent' && (
               <NavItem to="/categories" icon="categories">
-                Categories
+                Categorías
               </NavItem>
             )}
           </nav>
@@ -61,7 +61,7 @@ export function AppShell() {
             </span>
             <Button variant="ghost" size="sm" onClick={signOut}>
               <icon.signOut aria-hidden="true" />
-              Sign out
+              Cerrar sesión
             </Button>
           </div>
         </div>

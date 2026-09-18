@@ -8,6 +8,7 @@ import {
   waitFor,
   within,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TicketsPage } from './TicketsPage';
@@ -178,15 +179,13 @@ describe('TicketsPage', () => {
     await screen.findByText('Printer jammed');
 
     // A board, not a report: the column is the state, so the card needs no badge.
-    expect(column(/^Open/).getByText('Printer jammed')).toBeDefined();
+    expect(column(/^Abiertos/).getByText('Printer jammed')).toBeDefined();
+    expect(column(/^En curso/).getByText('Badge reader broken')).toBeDefined();
     expect(
-      column(/^In progress/).getByText('Badge reader broken'),
+      column(/^Resueltos/).getByText('VPN drops every hour'),
     ).toBeDefined();
-    expect(column(/^Resolved/).getByText('VPN drops every hour')).toBeDefined();
-    expect(screen.getByRole('heading', { name: 'Open 1' })).toBeDefined();
-    expect(
-      screen.getByRole('heading', { name: 'In progress 1' }),
-    ).toBeDefined();
+    expect(screen.getByRole('heading', { name: 'Abiertos 1' })).toBeDefined();
+    expect(screen.getByRole('heading', { name: 'En curso 1' })).toBeDefined();
   });
 
   it('shows on each card who it is for, who has it, and how long it has waited', async () => {
@@ -197,10 +196,10 @@ describe('TicketsPage', () => {
     expect(taken.getByText('Hardware')).toBeDefined();
     expect(taken.getByText('Lucía Fernández')).toBeDefined();
     expect(taken.getByTitle('Carla Ruiz')).toBeDefined();
-    expect(taken.getByText('2 days ago')).toBeDefined();
+    expect(taken.getByText('hace 2 días')).toBeDefined();
 
     const open = within(screen.getByRole('link', { name: /TCK-1/ }));
-    expect(open.getByText('Unassigned')).toBeDefined();
+    expect(open.getByText('Sin asignar')).toBeDefined();
   });
 
   it('links each card to its ticket', async () => {
@@ -215,17 +214,21 @@ describe('TicketsPage', () => {
     renderBoard(LUCIA);
     await screen.findByText('Printer jammed');
 
-    fireEvent.click(screen.getByRole('button', { name: 'New ticket' }));
-    fireEvent.change(await screen.findByLabelText('Title'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Nuevo ticket' }));
+    fireEvent.change(await screen.findByLabelText('Título'), {
       target: { value: 'Monitor flickers' },
     });
-    fireEvent.change(screen.getByLabelText('Description'), {
+    fireEvent.change(screen.getByLabelText('Descripción'), {
       target: { value: 'Every few seconds' },
     });
-    fireEvent.change(screen.getByLabelText('Category'), {
-      target: { value: 'c1' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Open ticket' }));
+    // The category is a dropdown the app draws, so it is opened and chosen by
+    // the name on screen. `userEvent` sends the whole pointer sequence Radix
+    // waits for; a single synthetic event never opens it.
+    await userEvent.click(screen.getByLabelText('Categoría'));
+    await userEvent.click(
+      await screen.findByRole('option', { name: 'Hardware' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir ticket' }));
 
     await waitFor(() =>
       expect(createTicket).toHaveBeenCalledWith({
@@ -241,7 +244,7 @@ describe('TicketsPage', () => {
     renderBoard(CARLA);
     await screen.findByText('Printer jammed');
 
-    expect(screen.queryByRole('button', { name: 'New ticket' })).toBe(null);
+    expect(screen.queryByRole('button', { name: 'Nuevo ticket' })).toBe(null);
   });
 
   it('keeps a requester from seeing who opened their own tickets', async () => {
@@ -260,7 +263,7 @@ describe('TicketsPage', () => {
     );
     renderBoard(LUCIA);
 
-    expect(await screen.findByText(/no tickets/i)).toBeDefined();
+    expect(await screen.findByText(/todavía no hay tickets/i)).toBeDefined();
   });
 
   /** jsdom has no DataTransfer, so the drag carries the id through a stub. */
@@ -285,7 +288,7 @@ describe('TicketsPage', () => {
     await screen.findByText('Printer jammed');
     expect(loads()).toBe(1);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Actualizar' }));
 
     // Nothing polls, and two agents share the queue: this is how you find out.
     await waitFor(() => expect(loads()).toBe(2));
@@ -295,7 +298,7 @@ describe('TicketsPage', () => {
     renderBoard(CARLA);
     await screen.findByText('Printer jammed');
 
-    drag('TCK-1', /^In progress/);
+    drag('TCK-1', /^En curso/);
 
     await waitFor(() => expect(takeTicket).toHaveBeenCalledWith('t1'));
     await waitFor(() => expect(loads()).toBe(2));
@@ -305,7 +308,7 @@ describe('TicketsPage', () => {
     renderBoard(CARLA);
     await screen.findByText('Badge reader broken');
 
-    drag('TCK-2', /^Resolved/);
+    drag('TCK-2', /^Resueltos/);
 
     await waitFor(() => expect(resolveTicket).toHaveBeenCalledWith('t2'));
   });
@@ -314,7 +317,7 @@ describe('TicketsPage', () => {
     renderBoard(CARLA);
     await screen.findByText('Badge reader broken');
 
-    drag('TCK-2', /^Open/);
+    drag('TCK-2', /^Abiertos/);
 
     await waitFor(() => expect(releaseTicket).toHaveBeenCalledWith('t2'));
   });
@@ -325,7 +328,7 @@ describe('TicketsPage', () => {
 
     // Open straight to Resolved: the API would refuse, so the board does not
     // even pretend to accept it.
-    drag('TCK-1', /^Resolved/);
+    drag('TCK-1', /^Resueltos/);
 
     await waitFor(() => expect(resolveTicket).not.toHaveBeenCalled());
     expect(takeTicket).not.toHaveBeenCalled();
@@ -338,7 +341,7 @@ describe('TicketsPage', () => {
     const card = screen.getByRole('link', { name: /TCK-1/ });
     expect(card.getAttribute('draggable')).not.toBe('true');
 
-    drag('TCK-1', /^In progress/);
+    drag('TCK-1', /^En curso/);
     await waitFor(() => expect(takeTicket).not.toHaveBeenCalled());
   });
 
@@ -349,7 +352,7 @@ describe('TicketsPage', () => {
     renderBoard(CARLA);
     await screen.findByText('Printer jammed');
 
-    drag('TCK-1', /^In progress/);
+    drag('TCK-1', /^En curso/);
 
     expect(
       await screen.findByText('This ticket has already been taken'),
@@ -381,46 +384,48 @@ describe('TicketsPage', () => {
     renderBoard(CARLA);
 
     await waitFor(() =>
-      expect(column(/^Resolved/).getAllByRole('link')).toHaveLength(10),
+      expect(column(/^Resueltos/).getAllByRole('link')).toHaveLength(10),
     );
     // The heading counts every resolved ticket, not the ten on screen.
-    expect(screen.getByRole('heading', { name: 'Resolved 25' })).toBeDefined();
+    expect(screen.getByRole('heading', { name: 'Resueltos 25' })).toBeDefined();
   });
 
   it('brings the next ten without touching the other columns', async () => {
     manyResolved(25);
     renderBoard(CARLA);
     await waitFor(() =>
-      expect(column(/^Resolved/).getAllByRole('link')).toHaveLength(10),
+      expect(column(/^Resueltos/).getAllByRole('link')).toHaveLength(10),
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /show more/i }));
+    fireEvent.click(screen.getByRole('button', { name: /ver más/i }));
 
     await waitFor(() =>
-      expect(column(/^Resolved/).getAllByRole('link')).toHaveLength(20),
+      expect(column(/^Resueltos/).getAllByRole('link')).toHaveLength(20),
     );
-    expect(column(/^Open/).getAllByRole('link')).toHaveLength(1);
-    expect(column(/^In progress/).getAllByRole('link')).toHaveLength(1);
+    expect(column(/^Abiertos/).getAllByRole('link')).toHaveLength(1);
+    expect(column(/^En curso/).getAllByRole('link')).toHaveLength(1);
   });
 
   it('stops at the biggest page the API allows', async () => {
     manyResolved(150);
     renderBoard(CARLA);
     await waitFor(() =>
-      expect(column(/^Resolved/).getAllByRole('link')).toHaveLength(10),
+      expect(column(/^Resueltos/).getAllByRole('link')).toHaveLength(10),
     );
 
     for (let shown = 20; shown <= 100; shown += 10) {
-      fireEvent.click(screen.getByRole('button', { name: /show more/i }));
+      fireEvent.click(screen.getByRole('button', { name: /ver más/i }));
       await waitFor(() =>
-        expect(column(/^Resolved/).getAllByRole('link')).toHaveLength(shown),
+        expect(column(/^Resueltos/).getAllByRole('link')).toHaveLength(shown),
       );
     }
 
     // Asking for 110 comes back 400 and would blank the board for somebody who
     // only pressed a button. The heading still says how many there really are.
-    expect(screen.queryByRole('button', { name: /show more/i })).toBe(null);
-    expect(screen.getByRole('heading', { name: 'Resolved 150' })).toBeDefined();
+    expect(screen.queryByRole('button', { name: /ver más/i })).toBe(null);
+    expect(
+      screen.getByRole('heading', { name: 'Resueltos 150' }),
+    ).toBeDefined();
   });
 
   it('drops the button once every resolved ticket is on screen', async () => {
@@ -428,14 +433,14 @@ describe('TicketsPage', () => {
     await screen.findByText('VPN drops every hour');
 
     // One resolved ticket, already drawn: there is nothing left to ask for.
-    expect(screen.queryByRole('button', { name: /show more/i })).toBe(null);
+    expect(screen.queryByRole('button', { name: /ver más/i })).toBe(null);
   });
 
   it('asks the API for the search term instead of sifting what it holds', async () => {
     renderBoard(CARLA);
     await screen.findByText('Printer jammed');
 
-    fireEvent.change(screen.getByLabelText('Search'), {
+    fireEvent.change(screen.getByLabelText('Buscar'), {
       target: { value: 'printer' },
     });
 
@@ -459,7 +464,7 @@ describe('TicketsPage', () => {
     renderBoard(CARLA, '/tickets?q=vpn');
     await waitFor(() => expect(searches()).toHaveLength(2));
 
-    fireEvent.change(screen.getByLabelText('Search'), {
+    fireEvent.change(screen.getByLabelText('Buscar'), {
       target: { value: '' },
     });
     fireEvent.submit(screen.getByRole('search'));
@@ -482,6 +487,6 @@ describe('TicketsPage', () => {
 
     const notice = await screen.findByRole('status');
 
-    expect(notice.textContent).toMatch(/2 of 137 active/i);
+    expect(notice.textContent).toMatch(/2 de 137 tickets activos/i);
   });
 });

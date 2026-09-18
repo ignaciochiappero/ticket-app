@@ -77,11 +77,11 @@ export function BoardFilters({
         onApply(draft);
       }}
     >
-      <Field id="filter-q" label="Search">
+      <Field id="filter-q" label="Buscar">
         <Input
           id="filter-q"
           type="search"
-          placeholder="Code or title"
+          placeholder="Código o título"
           className="w-52"
           value={draft.q}
           onChange={(event) => set('q')(event.target.value)}
@@ -90,12 +90,12 @@ export function BoardFilters({
 
       {showPeople && (
         <>
-          <Field id="filter-requester" label="Opened by">
+          <Field id="filter-requester" label="Abierto por">
             <Picker
               id="filter-requester"
               value={draft.requester}
               onChange={set('requester')}
-              placeholder="Anyone"
+              anyLabel="Cualquiera"
               options={requesters.map((person) => ({
                 value: person.id,
                 label: person.name,
@@ -103,15 +103,15 @@ export function BoardFilters({
             />
           </Field>
 
-          <Field id="filter-assignee" label="Agent">
+          <Field id="filter-assignee" label="Agente">
             <Picker
               id="filter-assignee"
               value={draft.assignee}
               onChange={set('assignee')}
-              placeholder="Anyone"
+              anyLabel="Cualquiera"
               options={[
                 // The question an agent actually asks: what has nobody taken?
-                { value: 'unassigned', label: 'Unassigned' },
+                { value: 'unassigned', label: 'Sin asignar' },
                 ...agents.map((person) => ({
                   value: person.id,
                   label: person.name,
@@ -122,34 +122,32 @@ export function BoardFilters({
         </>
       )}
 
-      <Field id="filter-order" label="Opened">
+      <Field id="filter-order" label="Apertura">
         <Picker
           id="filter-order"
           value={draft.order}
           onChange={set('order')}
-          placeholder="Newest first"
-          options={[{ value: 'asc', label: 'Oldest first' }]}
-          anyLabel="Newest first"
+          anyLabel="Más nuevos primero"
+          options={[{ value: 'asc', label: 'Más viejos primero' }]}
         />
       </Field>
 
       <div className="flex items-center gap-2">
-        <Button type="submit" size="sm">
+        <Button type="submit">
           <icon.filter aria-hidden="true" />
-          Apply
+          Aplicar
         </Button>
         {dirty && (
           <Button
             type="button"
             variant="ghost"
-            size="sm"
             onClick={() => {
               setDraft(EMPTY);
               onClear();
             }}
           >
             <icon.close aria-hidden="true" />
-            Clear
+            Limpiar
           </Button>
         )}
       </div>
@@ -158,8 +156,8 @@ export function BoardFilters({
 }
 
 /**
- * A dropdown drawn by the app rather than by the browser. A native `select`
- * is styleable only while it is closed: the list it opens is operating system
+ * A dropdown drawn by the app rather than by the browser. A native `select` is
+ * styleable only while it is closed: the list it opens is operating system
  * chrome, so it arrives white and blue in the middle of a dark board.
  *
  * Radix has no value for "no filter" — an empty string is not a selectable
@@ -172,24 +170,22 @@ function Picker({
   id,
   value,
   onChange,
-  placeholder,
+  anyLabel,
   options,
-  anyLabel = 'Anyone',
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
-  placeholder: string;
+  anyLabel: string;
   options: { value: string; label: string }[];
-  anyLabel?: string;
 }) {
   return (
     <Select
       value={value || NO_FILTER}
       onValueChange={(next) => onChange(next === NO_FILTER ? '' : next)}
     >
-      <SelectTrigger id={id} size="sm" className="w-44">
-        <SelectValue placeholder={placeholder} />
+      <SelectTrigger id={id} className="w-44">
+        <SelectValue placeholder={anyLabel} />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={NO_FILTER}>{anyLabel}</SelectItem>
@@ -213,8 +209,12 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id} className="text-xs text-ink-muted">
+    // The gap is a margin on the label, not `space-y` on the wrapper. Radix
+    // renders a hidden native select beside its trigger, so a rule that spaces
+    // "every child after the first" spaces that one too and leaves six phantom
+    // pixels under the dropdown, which is enough to break a row's alignment.
+    <div className="flex flex-col">
+      <Label htmlFor={id} className="mb-1.5 text-xs text-ink-muted">
         {label}
       </Label>
       {children}

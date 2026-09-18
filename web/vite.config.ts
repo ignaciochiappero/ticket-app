@@ -14,6 +14,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    setupFiles: ['./src/test-setup.ts'],
     // Every worker pays for its own jsdom, and a machine that is short of
     // memory cannot start several: vitest then reports "Test Files 4 passed
     // (10)", a line that says passed while six files never ran. One worker at

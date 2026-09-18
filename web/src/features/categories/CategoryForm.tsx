@@ -47,7 +47,7 @@ export function CategoryForm({ editing, onSave, onCancel }: Props) {
         message:
           error instanceof ApiError
             ? error.message
-            : 'Something went wrong. Try again.',
+            : 'Algo salió mal. Intentá de nuevo.',
       });
     }
   });
@@ -60,16 +60,16 @@ export function CategoryForm({ editing, onSave, onCancel }: Props) {
     >
       <div className="flex items-end gap-3">
         <div className="flex-1 space-y-2">
-          <Label htmlFor="category-name">Category name</Label>
+          <Label htmlFor="category-name">Nombre de la categoría</Label>
           <Input
             id="category-name"
             aria-invalid={Boolean(errors.name)}
-            placeholder="Printers"
+            placeholder="Impresoras"
             {...register('name')}
           />
         </div>
         <Button type="submit" disabled={isSubmitting}>
-          {editing ? 'Save' : 'Add category'}
+          {editing ? 'Guardar' : 'Agregar categoría'}
         </Button>
         {editing && (
           <Button type="button" variant="ghost" onClick={onCancel}>

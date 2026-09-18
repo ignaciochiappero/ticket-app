@@ -11,19 +11,19 @@ interface Props {
 
 // What each event reads as, after the person's name.
 const VERB: Record<HistoryEvent['type'], string> = {
-  created: 'opened the ticket',
-  edited: 'edited the ticket',
-  deleted: 'deleted the ticket',
-  taken: 'took the ticket',
-  released: 'released it back to the queue',
-  resolved: 'resolved it',
-  commented: 'commented',
+  created: 'abrió el ticket',
+  edited: 'editó el ticket',
+  deleted: 'eliminó el ticket',
+  taken: 'tomó el ticket',
+  released: 'lo devolvió a la cola',
+  resolved: 'lo resolvió',
+  commented: 'comentó',
 };
 
 const FIELD_LABEL: Record<FieldChange['field'], string> = {
-  title: 'Title',
-  description: 'Description',
-  categoryId: 'Category',
+  title: 'Título',
+  description: 'Descripción',
+  categoryId: 'Categoría',
 };
 
 /** The audit trail as people read it: who did what, when, and what changed. */
@@ -31,7 +31,7 @@ export function Timeline({ history, categories, now }: Props) {
   if (history.length === 0) {
     return (
       <p className="text-sm text-ink-dim">
-        Nothing has happened to this ticket yet.
+        Todavía no pasó nada con este ticket.
       </p>
     );
   }

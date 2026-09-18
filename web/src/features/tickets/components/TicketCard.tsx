@@ -78,7 +78,7 @@ export function TicketCard({
         {ticket.assignee ? (
           <Initials name={ticket.assignee.name} />
         ) : (
-          <span className="shrink-0 text-ink-dim">Unassigned</span>
+          <span className="shrink-0 text-ink-dim">Sin asignar</span>
         )}
       </div>
     </Link>

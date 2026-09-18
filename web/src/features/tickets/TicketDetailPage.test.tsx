@@ -116,19 +116,19 @@ describe('TicketDetailPage', () => {
       await screen.findByRole('heading', { name: 'Printer jammed' }),
     ).toBeDefined();
     expect(screen.getByText('TCK-1')).toBeDefined();
-    expect(screen.getByText('Open')).toBeDefined();
+    expect(screen.getByText('Abierto')).toBeDefined();
     expect(
       screen.getByText('It jams on every double-sided job.'),
     ).toBeDefined();
-    expect(screen.getByText(/opened the ticket/)).toBeDefined();
+    expect(screen.getByText(/abrió el ticket/)).toBeDefined();
   });
 
   it('offers the owner edit and delete while the ticket is open', async () => {
     renderDetail(LUCIA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
 
-    expect(screen.getByRole('button', { name: 'Edit' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Delete' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Editar' })).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Eliminar' })).toBeDefined();
   });
 
   it("takes the owner's actions away once the ticket is taken", async () => {
@@ -143,8 +143,8 @@ describe('TicketDetailPage', () => {
 
     // The API would answer 409; the interface simply stops offering it, and
     // says why.
-    expect(screen.queryByRole('button', { name: 'Edit' })).toBe(null);
-    expect(screen.queryByRole('button', { name: 'Delete' })).toBe(null);
+    expect(screen.queryByRole('button', { name: 'Editar' })).toBe(null);
+    expect(screen.queryByRole('button', { name: 'Eliminar' })).toBe(null);
     expect(screen.getByText(/Carla Ruiz/)).toBeDefined();
   });
 
@@ -163,12 +163,12 @@ describe('TicketDetailPage', () => {
     renderDetail(LUCIA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
-    const title = (await screen.findByLabelText('Title')) as HTMLInputElement;
+    fireEvent.click(screen.getByRole('button', { name: 'Editar' }));
+    const title = (await screen.findByLabelText('Título')) as HTMLInputElement;
     expect(title.value).toBe('Printer jammed');
 
     fireEvent.change(title, { target: { value: 'Printer on floor 3 jammed' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
     await waitFor(() =>
       expect(updateTicket).toHaveBeenCalledWith('t1', {
@@ -184,10 +184,10 @@ describe('TicketDetailPage', () => {
     renderDetail(LUCIA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
     expect(deleteTicket).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm delete' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar borrado' }));
 
     await waitFor(() => expect(deleteTicket).toHaveBeenCalledWith('t1'));
     expect(await screen.findByText('Board')).toBeDefined();
@@ -197,7 +197,7 @@ describe('TicketDetailPage', () => {
     renderDetail(CARLA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Take' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tomar' }));
 
     await waitFor(() => expect(takeTicket).toHaveBeenCalledWith('t1'));
     // The page shows what the API now holds, not what the click assumed.
@@ -209,17 +209,21 @@ describe('TicketDetailPage', () => {
 
     const { unmount } = renderDetail(CARLA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
-    expect(screen.getByRole('button', { name: 'Release' })).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Resolve' })).toBeDefined();
-    expect(screen.queryByRole('button', { name: 'Take' })).toBe(null);
+    expect(
+      screen.getByRole('button', { name: 'Devolver a la cola' }),
+    ).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Resolver' })).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Tomar' })).toBe(null);
     unmount();
 
     renderDetail(DIEGO);
     await screen.findByRole('heading', { name: 'Printer jammed' });
     // Another agent sees whose it is, and nothing to press.
-    expect(screen.queryByRole('button', { name: 'Release' })).toBe(null);
-    expect(screen.queryByRole('button', { name: 'Resolve' })).toBe(null);
-    expect(screen.getByText(/Assigned to Carla Ruiz/)).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Devolver a la cola' })).toBe(
+      null,
+    );
+    expect(screen.queryByRole('button', { name: 'Resolver' })).toBe(null);
+    expect(screen.getByText(/Asignado a Carla Ruiz/)).toBeDefined();
   });
 
   it('resolves and releases through the API', async () => {
@@ -227,7 +231,7 @@ describe('TicketDetailPage', () => {
     renderDetail(CARLA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Resolve' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Resolver' }));
     await waitFor(() => expect(resolveTicket).toHaveBeenCalledWith('t1'));
   });
 
@@ -238,22 +242,22 @@ describe('TicketDetailPage', () => {
 
     const { unmount } = renderDetail(CARLA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
-    for (const name of ['Take', 'Release', 'Resolve']) {
+    for (const name of ['Tomar', 'Devolver a la cola', 'Resolver']) {
       expect(screen.queryByRole('button', { name })).toBe(null);
     }
     unmount();
 
     renderDetail(LUCIA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
-    expect(screen.queryByRole('button', { name: 'Edit' })).toBe(null);
-    expect(screen.queryByRole('button', { name: 'Delete' })).toBe(null);
+    expect(screen.queryByRole('button', { name: 'Editar' })).toBe(null);
+    expect(screen.queryByRole('button', { name: 'Eliminar' })).toBe(null);
   });
 
   it('never offers the agent actions to a requester', async () => {
     renderDetail(LUCIA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
 
-    expect(screen.queryByRole('button', { name: 'Take' })).toBe(null);
+    expect(screen.queryByRole('button', { name: 'Tomar' })).toBe(null);
   });
 
   it('says so when another agent got there first, and shows the real state', async () => {
@@ -270,12 +274,12 @@ describe('TicketDetailPage', () => {
     renderDetail(CARLA);
     await screen.findByRole('heading', { name: 'Printer jammed' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Take' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tomar' }));
 
     expect(
       await screen.findByText('Another agent took it first'),
     ).toBeDefined();
-    expect(await screen.findByText(/Assigned to Diego López/)).toBeDefined();
-    expect(screen.queryByRole('button', { name: 'Take' })).toBe(null);
+    expect(await screen.findByText(/Asignado a Diego López/)).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Tomar' })).toBe(null);
   });
 });

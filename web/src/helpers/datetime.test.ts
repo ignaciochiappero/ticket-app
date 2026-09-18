@@ -12,29 +12,29 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 describe('timeAgo', () => {
-  it('calls anything under a minute "just now"', () => {
-    expect(timeAgo(ago(0), NOW)).toBe('just now');
-    expect(timeAgo(ago(59_000), NOW)).toBe('just now');
+  it('calls anything under a minute "recién"', () => {
+    expect(timeAgo(ago(0), NOW)).toBe('recién');
+    expect(timeAgo(ago(59_000), NOW)).toBe('recién');
   });
 
   it('counts minutes, hours and days, singular when there is one', () => {
-    expect(timeAgo(ago(MINUTE), NOW)).toBe('1 minute ago');
-    expect(timeAgo(ago(5 * MINUTE), NOW)).toBe('5 minutes ago');
-    expect(timeAgo(ago(HOUR), NOW)).toBe('1 hour ago');
-    expect(timeAgo(ago(3 * HOUR), NOW)).toBe('3 hours ago');
-    expect(timeAgo(ago(DAY), NOW)).toBe('1 day ago');
-    expect(timeAgo(ago(2 * DAY), NOW)).toBe('2 days ago');
+    expect(timeAgo(ago(MINUTE), NOW)).toBe('hace 1 minuto');
+    expect(timeAgo(ago(5 * MINUTE), NOW)).toBe('hace 5 minutos');
+    expect(timeAgo(ago(HOUR), NOW)).toBe('hace 1 hora');
+    expect(timeAgo(ago(3 * HOUR), NOW)).toBe('hace 3 horas');
+    expect(timeAgo(ago(DAY), NOW)).toBe('hace 1 día');
+    expect(timeAgo(ago(2 * DAY), NOW)).toBe('hace 2 días');
   });
 
   it('keeps counting days rather than switching to a date', () => {
     // A ticket that has waited 45 days is the one the board exists to expose;
     // "Aug 3" would hide exactly how long that is.
-    expect(timeAgo(ago(45 * DAY), NOW)).toBe('45 days ago');
+    expect(timeAgo(ago(45 * DAY), NOW)).toBe('hace 45 días');
   });
 
   it('rounds down, so a unit is only counted once it is complete', () => {
-    expect(timeAgo(ago(HOUR + 59 * MINUTE), NOW)).toBe('1 hour ago');
-    expect(timeAgo(ago(DAY - 1), NOW)).toBe('23 hours ago');
+    expect(timeAgo(ago(HOUR + 59 * MINUTE), NOW)).toBe('hace 1 hora');
+    expect(timeAgo(ago(DAY - 1), NOW)).toBe('hace 23 horas');
   });
 });
 

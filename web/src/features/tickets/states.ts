@@ -7,9 +7,21 @@ export const STATES: TicketState[] = ['open', 'in_progress', 'resolved'];
 // tickets in progress, so they are asked for in one go.
 export const ACTIVE_STATES: TicketState[] = ['open', 'in_progress'];
 
-/** The API names states for machines; a heading is read by people. */
+/**
+ * Column headings, which name a pile of tickets and so read as plurals.
+ * Separate from the singular below because Spanish agrees in number: a column
+ * of many is "Abiertos" while one ticket is "Abierto", and using a single set
+ * for both is guaranteed to get one of them wrong.
+ */
 export const STATE_LABEL: Record<TicketState, string> = {
-  open: 'Open',
-  in_progress: 'In progress',
-  resolved: 'Resolved',
+  open: 'Abiertos',
+  in_progress: 'En curso',
+  resolved: 'Resueltos',
+};
+
+/** One ticket's state, for the badge that labels a single ticket. */
+export const STATE_NAME: Record<TicketState, string> = {
+  open: 'Abierto',
+  in_progress: 'En curso',
+  resolved: 'Resuelto',
 };

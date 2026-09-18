@@ -1,7 +1,7 @@
 import type { TicketState } from '@/api/types';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { STATE_LABEL } from '../states';
+import { STATE_NAME } from '../states';
 
 // One tint per state, low alpha so it reads on both themes. Open takes the
 // accent: it is the state that asks somebody to do something.
@@ -14,7 +14,7 @@ const STATE_CLASS: Record<TicketState, string> = {
 export function StateBadge({ state }: { state: TicketState }) {
   return (
     <Badge variant="secondary" className={cn('border-0', STATE_CLASS[state])}>
-      {STATE_LABEL[state]}
+      {STATE_NAME[state]}
     </Badge>
   );
 }

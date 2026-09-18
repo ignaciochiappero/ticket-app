@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { ticketSchema, type TicketValues } from '../validation';
 
 interface Props {
@@ -29,6 +32,7 @@ interface Props {
 export function TicketForm({ categories, initial, onSubmit, onCancel }: Props) {
   const {
     register,
+    control,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
@@ -47,7 +51,7 @@ export function TicketForm({ categories, initial, onSubmit, onCancel }: Props) {
         message:
           error instanceof ApiError
             ? error.message
-            : 'Something went wrong. Try again.',
+            : 'Algo salió mal. Intentá de nuevo.',
       });
     }
   });
@@ -55,10 +59,10 @@ export function TicketForm({ categories, initial, onSubmit, onCancel }: Props) {
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="ticket-title">Title</Label>
+        <Label htmlFor="ticket-title">Título</Label>
         <Input
           id="ticket-title"
-          placeholder="Printer on floor 3 is jammed"
+          placeholder="La impresora del piso 3 se traba"
           aria-invalid={Boolean(errors.title)}
           {...register('title')}
         />
@@ -66,11 +70,11 @@ export function TicketForm({ categories, initial, onSubmit, onCancel }: Props) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="ticket-description">Description</Label>
+        <Label htmlFor="ticket-description">Descripción</Label>
         <Textarea
           id="ticket-description"
           rows={5}
-          placeholder="What happens, since when, and what you already tried."
+          placeholder="Qué pasa, desde cuándo, y qué probaste."
           aria-invalid={Boolean(errors.description)}
           {...register('description')}
         />
@@ -78,20 +82,36 @@ export function TicketForm({ categories, initial, onSubmit, onCancel }: Props) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="ticket-category">Category</Label>
-        <NativeSelect
-          id="ticket-category"
-          className="w-full"
-          aria-invalid={Boolean(errors.categoryId)}
-          {...register('categoryId')}
-        >
-          <NativeSelectOption value="">Select a category</NativeSelectOption>
-          {categories.map((category) => (
-            <NativeSelectOption key={category.id} value={category.id}>
-              {category.name}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+        <Label htmlFor="ticket-category">Categoría</Label>
+        {/*
+          A Controller rather than `register`, because this is not a native
+          input: Radix reports its value through a callback, so react-hook-form
+          has to be handed it instead of reading it off the DOM. The dropdown
+          is drawn by the app, which a native `select` cannot be — the list it
+          opens is operating system chrome.
+        */}
+        <Controller
+          name="categoryId"
+          control={control}
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger
+                id="ticket-category"
+                className="w-full"
+                aria-invalid={Boolean(errors.categoryId)}
+              >
+                <SelectValue placeholder="Elegí una categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
         <FieldError message={errors.categoryId?.message} />
       </div>
 
@@ -106,10 +126,10 @@ export function TicketForm({ categories, initial, onSubmit, onCancel }: Props) {
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isSubmitting}>
-          {initial ? 'Save' : 'Open ticket'}
+          {initial ? 'Guardar' : 'Abrir ticket'}
         </Button>
         <Button type="button" variant="ghost" onClick={onCancel}>
-          Cancel
+          Cancelar
         </Button>
       </div>
     </form>

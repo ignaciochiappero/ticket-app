@@ -14,16 +14,16 @@ export function LandingPage() {
     <main className="grid min-h-dvh place-items-center bg-ground px-6">
       <div className="w-full max-w-md rounded-panel bg-surface p-10">
         <p className="text-xs tracking-widest text-ink-dim uppercase">
-          Internal support
+          Soporte interno
         </p>
         <h1 className="mt-3 text-3xl font-medium tracking-tight">Ticket App</h1>
         <p className="mt-4 text-sm leading-relaxed text-ink-muted">
-          Open a support request and follow it to the end. Agents work the queue
-          from the same board, and every change is recorded with who made it and
-          when.
+          Abrí un pedido de soporte y seguilo hasta el final. Los agentes
+          trabajan la cola desde el mismo tablero, y cada cambio queda
+          registrado con quién lo hizo y cuándo.
         </p>
         <Button asChild className="mt-8 w-full">
-          <Link to="/login">Sign in</Link>
+          <Link to="/login">Ingresar</Link>
         </Button>
       </div>
     </main>
