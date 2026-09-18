@@ -119,10 +119,17 @@ demand.
 
 ## Phase 8: Verification
 
-- [ ] 8.1 Run `pnpm run check` (lint + unit, api + web); fix any failure.
-- [ ] 8.2 `docker compose up -d mongo`, run `pnpm -C api test:e2e`; all 6 capability files pass, including concurrent-take and the category race.
-- [ ] 8.3 `docker compose up --build` end to end: seeded users/categories visible, full ticket flow works through the UI with no manual steps.
-- [ ] 8.4 Check `http://localhost:3000/docs`: only product endpoints listed, logging in from `/docs` authenticates the later calls, schemas match design section 5.
+Run against images built from scratch with `docker compose up --build`, not against
+the dev servers: 23 end-to-end checks, all green. The web container falls back to
+the app on a deep link and still 404s a missing asset; `/docs` lists ten product
+endpoints and declares bearer auth; the seed brings 8 users and 4 categories; a
+ticket goes created -> taken -> resolved with one history event each, a second
+agent taking it gets 409, and the board answers each column separately.
+
+- [x] 8.1 Run `pnpm run check` (lint + unit, api + web); fix any failure.
+- [x] 8.2 `docker compose up -d mongo`, run `pnpm -C api test:e2e`; all 6 capability files pass, including concurrent-take and the category race.
+- [x] 8.3 `docker compose up --build` end to end: seeded users/categories visible, full ticket flow works through the UI with no manual steps.
+- [x] 8.4 Check `http://localhost:3000/docs`: only product endpoints listed, logging in from `/docs` authenticates the later calls, schemas match design section 5.
 
 ## Phase 9: Delivery Documentation
 
