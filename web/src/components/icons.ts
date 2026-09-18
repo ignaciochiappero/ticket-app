@@ -1,4 +1,5 @@
 import {
+  ChevronDown,
   ArrowLeft,
   Check,
   Clock,
@@ -43,6 +44,7 @@ export const icon = {
   release: Undo2,
   resolve: Check,
   drag: GripVertical,
+  more: ChevronDown,
 
   // Ticket facts
   person: User,

@@ -1,4 +1,6 @@
 import type { Category, TicketState, TicketSummary, User } from '@/api/types';
+import { icon } from '@/components/icons';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { TICKET_DRAG_TYPE, TicketCard } from './TicketCard';
@@ -11,6 +13,15 @@ interface Props {
   user: User | null;
   showRequester: boolean;
   onMove: (ticket: TicketSummary, move: Move) => Promise<void>;
+  /**
+   * How many resolved tickets exist, which is not how many are drawn. Open
+   * and In progress hold live work and bound themselves; Resolved is the one
+   * column that only ever grows, so it arrives ten at a time.
+   */
+  resolvedTotal: number;
+  /** False once the column holds everything, or everything the API will give. */
+  canShowMore: boolean;
+  onShowMore: () => void;
 }
 
 /**
@@ -27,6 +38,9 @@ export function Board({
   user,
   showRequester,
   onMove,
+  resolvedTotal,
+  canShowMore,
+  onShowMore,
 }: Props) {
   const [dragging, setDragging] = useState<TicketSummary | null>(null);
   const [over, setOver] = useState<TicketState | null>(null);
@@ -90,7 +104,8 @@ export function Board({
             >
               {STATE_LABEL[state]}{' '}
               <span className="rounded-pill bg-tile px-2 py-0.5 text-xs font-normal text-ink-muted">
-                {cards.length}
+                {/* How many there are, not how many fit on screen. */}
+                {state === 'resolved' ? resolvedTotal : cards.length}
               </span>
             </h2>
             <div className="space-y-2">
@@ -108,6 +123,17 @@ export function Board({
                 <p className="px-1 py-6 text-center text-xs text-ink-dim">
                   Nothing here
                 </p>
+              )}
+              {state === 'resolved' && canShowMore && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-ink-muted"
+                  onClick={onShowMore}
+                >
+                  <icon.more aria-hidden="true" />
+                  Show more
+                </Button>
               )}
             </div>
           </section>

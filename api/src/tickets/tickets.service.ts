@@ -9,14 +9,15 @@ import type { ActingUser } from '../auth/auth.decorators.js';
 import { CategoriesService } from '../categories/categories.service.js';
 import { CountersService } from '../counters/counters.service.js';
 import { UsersService } from '../users/users.service.js';
-import type { PaginationQueryDto } from '../pagination/dto/pagination-query.dto.js';
 import { resolvePage } from '../pagination/pagination.js';
 import type { CreateTicketDto } from './dto/create-ticket.dto.js';
 import type { PaginatedTicketsDto } from './dto/paginated-tickets.dto.js';
 import type { PersonDto } from './dto/person.dto.js';
 import type { TicketDto } from './dto/ticket.dto.js';
 import type { TicketSummaryDto } from './dto/ticket-summary.dto.js';
+import type { TicketQueryDto } from './dto/ticket-query.dto.js';
 import type { UpdateTicketDto } from './dto/update-ticket.dto.js';
+import { boardQuery } from './ticket-query.js';
 import {
   assertCanAct,
   editChanges,
@@ -74,25 +75,21 @@ export class TicketsService {
   /**
    * The board: one page of the tickets this user is allowed to see, newest
    * first. A requester's scope is part of the filter rather than something the
-   * caller passes, so no query string can widen it. Phase 7 adds the filters
-   * on top of this same shape.
+   * caller passes, so no query string can widen it. Which states come back,
+   * and in what order, is `boardQuery`'s decision.
    */
   async findAll(
-    query: PaginationQueryDto,
+    query: TicketQueryDto,
     user: ActingUser,
   ): Promise<PaginatedTicketsDto> {
     const { page, limit, skip } = resolvePage(query);
-    const filter = scopeOf(user);
+    // The scope goes in first, so no query string can widen it. Which states
+    // to show and how to order them is `boardQuery`'s to decide, and it is
+    // pure, so the rule is tested without a database.
+    const { filter, sort } = boardQuery(query, scopeOf(user));
 
     const [tickets, total] = await Promise.all([
-      this.ticketModel
-        .find(filter)
-        // Both keys descending: reversing only `createdAt` would let two
-        // tickets created in the same millisecond swap between pages.
-        .sort({ createdAt: -1, _id: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      this.ticketModel.find(filter).sort(sort).skip(skip).limit(limit).lean(),
       this.ticketModel.countDocuments(filter),
     ]);
 
@@ -202,7 +199,13 @@ export class TicketsService {
       .findOneAndUpdate(
         { ...activeFilter(id, user), ...move.from },
         {
-          $set: move.to,
+          $set: {
+            ...move.to,
+            // Stamped with the same instant as the event pushed beside it, so
+            // the board and the timeline can never tell different stories
+            // about when the ticket was finished.
+            ...(move.action === 'resolve' ? { resolvedAt: at } : {}),
+          },
           $push: { history: event(EVENT_OF[move.action], user, at) },
         },
         { returnDocument: 'after' },
