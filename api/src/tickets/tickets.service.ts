@@ -10,6 +10,7 @@ import { CategoriesService } from '../categories/categories.service.js';
 import { CountersService } from '../counters/counters.service.js';
 import { UsersService } from '../users/users.service.js';
 import { resolvePage } from '../pagination/pagination.js';
+import type { CreateCommentDto } from './dto/create-comment.dto.js';
 import type { CreateTicketDto } from './dto/create-ticket.dto.js';
 import type { PaginatedTicketsDto } from './dto/paginated-tickets.dto.js';
 import type { PersonDto } from './dto/person.dto.js';
@@ -105,6 +106,43 @@ export class TicketsService {
 
   async findOne(id: string, user: ActingUser): Promise<TicketDto> {
     return this.toDto(await this.read('view', id, user));
+  }
+
+  /**
+   * Adds a comment, which is a history event like any other: a comment is
+   * something that happened to the ticket, in order, beside the takes and the
+   * edits. There is no route to change or remove one, so the trail stays
+   * append-only and the timeline can be read as a record.
+   */
+  async comment(
+    id: string,
+    dto: CreateCommentDto,
+    user: ActingUser,
+  ): Promise<TicketDto> {
+    await this.read('comment', id, user);
+
+    const at = new Date();
+    const commented = await this.ticketModel
+      .findOneAndUpdate(
+        // The state is repeated in the filter, not just checked above: a
+        // ticket resolved a moment ago must not collect a comment anyway.
+        { ...activeFilter(id, user), state: { $ne: 'resolved' } },
+        {
+          // Written out rather than spread from `event`, because a comment is
+          // the one event that carries a body.
+          $push: {
+            history: {
+              type: 'commented',
+              actorId: user.id,
+              at,
+              body: dto.body,
+            },
+          },
+        },
+        { returnDocument: 'after' },
+      )
+      .lean();
+    return this.toDto(commented ?? (await this.lostRace('comment', id, user)));
   }
 
   async update(

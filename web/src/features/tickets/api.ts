@@ -23,6 +23,14 @@ export function updateTicket(
   });
 }
 
+/** Comments are history events, so the whole ticket comes back with its new timeline. */
+export function addComment(id: string, body: string): Promise<Ticket> {
+  return apiFetch(`/tickets/${id}/comments`, {
+    method: 'POST',
+    body: JSON.stringify({ body }),
+  });
+}
+
 export function deleteTicket(id: string): Promise<void> {
   return apiFetch(`/tickets/${id}`, { method: 'DELETE' });
 }

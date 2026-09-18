@@ -8,6 +8,7 @@ import { formatDateTime, timeAgo } from '@/helpers/datetime';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import {
+  addComment,
   deleteTicket,
   getTicket,
   releaseTicket,
@@ -16,6 +17,7 @@ import {
   updateTicket,
 } from './api';
 import { StateBadge } from './components/StateBadge';
+import { CommentForm } from './components/CommentForm';
 import { TicketForm } from './components/TicketForm';
 import { Timeline } from './components/Timeline';
 
@@ -279,6 +281,24 @@ export function TicketDetailPage() {
           History
         </h2>
         <Timeline history={ticket.history} categories={categories} />
+
+        {/*
+          A comment is a history event, so the form sits at the end of the
+          timeline rather than in a section of its own: what you add lands in
+          the same record as everything else that happened.
+
+          A resolved ticket is finished, and its history is closed with it.
+        */}
+        {ticket.state !== 'resolved' && (
+          <div className="mt-6 border-t border-tile pt-6">
+            <CommentForm
+              onSubmit={async (body) => {
+                await addComment(ticket.id, body);
+                await load();
+              }}
+            />
+          </div>
+        )}
       </div>
     </section>
   );

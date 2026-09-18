@@ -26,6 +26,7 @@ import {
   Roles,
 } from '../auth/auth.decorators.js';
 import { TicketQueryDto } from './dto/ticket-query.dto.js';
+import { CreateCommentDto } from './dto/create-comment.dto.js';
 import { CreateTicketDto } from './dto/create-ticket.dto.js';
 import { PaginatedTicketsDto } from './dto/paginated-tickets.dto.js';
 import { TicketDto } from './dto/ticket.dto.js';
@@ -119,6 +120,21 @@ export class TicketsController {
     @CurrentUser() user: ActingUser,
   ): Promise<TicketDto> {
     return this.ticketsService.take(id, user);
+  }
+
+  /** Add a comment to a ticket (its requester, or any agent) */
+  @Post(':id/comments')
+  @ApiParam(TICKET_ID_PARAM)
+  @ApiBadRequestResponse({ description: 'Malformed id, or an empty comment' })
+  @ApiForbiddenResponse({ description: 'This ticket belongs to someone else' })
+  @ApiNotFoundResponse({ description: 'Ticket not found or deleted' })
+  @ApiConflictResponse({ description: 'This ticket is resolved' })
+  comment(
+    @Param('id', IsObjectIdPipe) id: string,
+    @Body() dto: CreateCommentDto,
+    @CurrentUser() user: ActingUser,
+  ): Promise<TicketDto> {
+    return this.ticketsService.comment(id, dto, user);
   }
 
   /** Put a ticket you took back in the queue, unassigned (its assignee only) */
