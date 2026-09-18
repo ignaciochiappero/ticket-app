@@ -127,6 +127,14 @@ function answer(query = ''): Promise<Page<TicketSummary>> {
   return Promise.resolve(page(ACTIVE));
 }
 
+/** The search terms the board has actually asked the API for. */
+function searches(): string[] {
+  return listTickets.mock.calls
+    .map(([query]) => /[?&]q=([^&]*)/.exec(String(query))?.[1])
+    .filter((term): term is string => term !== undefined)
+    .map((term) => decodeURIComponent(term));
+}
+
 /** The board asks once per column, so one reload is two calls, not one. */
 function loads(): number {
   return listTickets.mock.calls.filter(([query]) =>
@@ -134,11 +142,11 @@ function loads(): number {
   ).length;
 }
 
-function renderBoard(user: User) {
+function renderBoard(user: User, at = '/tickets') {
   localStorage.setItem('ticket-app.token', 'a-token');
   fetchCurrentUser.mockResolvedValue(user);
   return render(
-    <MemoryRouter initialEntries={['/tickets']}>
+    <MemoryRouter initialEntries={[at]}>
       <AuthProvider>
         <Routes>
           <Route path="/tickets" element={<TicketsPage />} />
@@ -421,6 +429,44 @@ describe('TicketsPage', () => {
 
     // One resolved ticket, already drawn: there is nothing left to ask for.
     expect(screen.queryByRole('button', { name: /show more/i })).toBe(null);
+  });
+
+  it('asks the API for the search term instead of sifting what it holds', async () => {
+    renderBoard(CARLA);
+    await screen.findByText('Printer jammed');
+
+    fireEvent.change(screen.getByLabelText('Search'), {
+      target: { value: 'printer' },
+    });
+
+    // Nothing goes out while somebody is still typing: a board of thousands
+    // would be a request per keystroke.
+    expect(searches()).toEqual([]);
+
+    fireEvent.submit(screen.getByRole('search'));
+
+    // Both columns carry the term, so neither shows tickets the other filtered.
+    await waitFor(() => expect(searches()).toEqual(['printer', 'printer']));
+  });
+
+  it('reads the search term from the URL, so a filtered board is a link', async () => {
+    renderBoard(CARLA, '/tickets?q=vpn');
+
+    await waitFor(() => expect(searches()).toEqual(['vpn', 'vpn']));
+  });
+
+  it('brings the whole board back when the box is cleared', async () => {
+    renderBoard(CARLA, '/tickets?q=vpn');
+    await waitFor(() => expect(searches()).toHaveLength(2));
+
+    fireEvent.change(screen.getByLabelText('Search'), {
+      target: { value: '' },
+    });
+    fireEvent.submit(screen.getByRole('search'));
+
+    // Asked again, this time without the term, rather than reusing the old page.
+    await waitFor(() => expect(loads()).toBe(2));
+    expect(searches()).toHaveLength(2);
   });
 
   it('says so when it cannot show every active ticket', async () => {
