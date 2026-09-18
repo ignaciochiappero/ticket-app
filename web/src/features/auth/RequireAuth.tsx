@@ -1,7 +1,7 @@
 import type { Role } from '@/api/types';
 import { Navigate } from 'react-router';
 import type { ReactNode } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from './auth-context';
 
 /**
  * Keeps a route behind a session, and optionally behind a role. This is for the

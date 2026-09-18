@@ -1,4 +1,5 @@
 import type { Category } from '@/api/types';
+import { icon } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -109,6 +110,7 @@ export function CategoriesPage() {
                       setEditing(category);
                     }}
                   >
+                    <icon.edit aria-hidden="true" />
                     Rename
                   </Button>
                   {confirming === category.id ? (
@@ -117,6 +119,7 @@ export function CategoriesPage() {
                       size="sm"
                       onClick={() => void remove(category.id)}
                     >
+                      <icon.delete aria-hidden="true" />
                       Confirm delete
                     </Button>
                   ) : (
@@ -127,6 +130,7 @@ export function CategoriesPage() {
                       title={category.used ? LOCK_REASON : undefined}
                       onClick={() => setConfirming(category.id)}
                     >
+                      <icon.delete aria-hidden="true" />
                       Delete
                     </Button>
                   )}

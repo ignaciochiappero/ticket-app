@@ -1,8 +1,8 @@
 import { ApiError } from '@/api/client';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthProvider } from './AuthContext';
+import { AuthProvider } from './AuthProvider';
 import { LoginPage } from './LoginPage';
 
 const { login, fetchCurrentUser } = vi.hoisted(() => ({
@@ -75,7 +75,7 @@ describe('LoginPage', () => {
     submit();
 
     // Trimmed: a username pasted with a trailing space is not a wrong username.
-    await vi.waitFor(() =>
+    await waitFor(() =>
       expect(login).toHaveBeenCalledWith({
         username: 'carla.ruiz',
         password: 'ticket-demo',

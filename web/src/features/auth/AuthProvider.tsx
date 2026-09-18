@@ -1,31 +1,19 @@
 import { readToken, writeToken } from '@/api/client';
 import type { User } from '@/api/types';
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
 import { fetchCurrentUser, login } from './api';
-
-type Status = 'loading' | 'signed-in' | 'signed-out';
-
-interface AuthValue {
-  status: Status;
-  user: User | null;
-  signIn: (username: string, password: string) => Promise<void>;
-  signOut: () => void;
-}
-
-const AuthContext = createContext<AuthValue | null>(null);
+import { AuthContext, type AuthStatus } from './auth-context';
 
 // The token is the only thing kept in storage. Who it belongs to always comes
 // from GET /auth/me, so the app never trusts anything it could have edited.
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<Status>(() =>
+  const [status, setStatus] = useState<AuthStatus>(() =>
     readToken() ? 'loading' : 'signed-out',
   );
   const [user, setUser] = useState<User | null>(null);
@@ -65,12 +53,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [status, user, signIn, signOut],
   );
   return <AuthContext value={value}>{children}</AuthContext>;
-}
-
-export function useAuth(): AuthValue {
-  const value = useContext(AuthContext);
-  if (!value) {
-    throw new Error('useAuth must be used inside AuthProvider');
-  }
-  return value;
 }

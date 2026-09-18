@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/features/auth/AuthContext';
+import { AuthProvider } from '@/features/auth/AuthProvider';
 import { BrowserRouter } from 'react-router';
 import { AppRoutes } from '@/routes';
 

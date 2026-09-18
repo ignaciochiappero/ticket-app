@@ -27,3 +27,57 @@ export interface Page<T> {
   page: number;
   limit: number;
 }
+
+export type TicketState = 'open' | 'in_progress' | 'resolved';
+
+export interface Person {
+  id: string;
+  name: string;
+}
+
+/** What the board shows per row: no description, no history. */
+export interface TicketSummary {
+  id: string;
+  code: string;
+  title: string;
+  categoryId: string;
+  state: TicketState;
+  requester: Person;
+  assignee: Person | null;
+  createdAt: string;
+}
+
+export type HistoryEventType =
+  | 'created'
+  | 'edited'
+  | 'deleted'
+  | 'taken'
+  | 'released'
+  | 'resolved'
+  | 'commented';
+
+export interface FieldChange {
+  field: 'title' | 'description' | 'categoryId';
+  from: string;
+  to: string;
+}
+
+export interface HistoryEvent {
+  type: HistoryEventType;
+  actor: Person;
+  at: string;
+  changes?: FieldChange[];
+  body?: string;
+}
+
+/** The detail view: the summary plus the parts worth a second request. */
+export interface Ticket extends TicketSummary {
+  description: string;
+  history: HistoryEvent[];
+}
+
+export interface TicketInput {
+  title: string;
+  description: string;
+  categoryId: string;
+}

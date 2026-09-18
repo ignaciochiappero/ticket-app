@@ -11,4 +11,6 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   done
 done
 
-exit 0
+# The full gate, including the unit tests, paid for once per push rather than
+# once per commit. The cheap half of it already ran on each commit.
+pnpm run check
