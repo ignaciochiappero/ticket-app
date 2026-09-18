@@ -105,18 +105,26 @@ overridable.
 | `JWT_SECRET`   | a random one per start              | API        | at startup        |
 | `VITE_API_URL` | `http://localhost:3000`             | web        | **at build time** |
 
-Two asymmetries matter, and both will bite somebody who does not know them.
+Each project ships a template: copy `api/.env.example` to `api/.env`, and
+`web/.env.example` to `web/.env.local`. Neither file is required and neither is
+committed.
 
-**The API does not read `.env` files.** There is no `ConfigModule` and no
-`dotenv`: it reads `process.env` directly. Putting a `.env` in `api/` does
-nothing. Set the variables in the shell that starts it, or pass Node's own
-`--env-file`.
+**There is no config library.** The API reads `process.env` directly, and a
+single `process.loadEnvFile()` at the top of `main.ts` makes `api/.env` work —
+native to Node 22, no dependency. It does **not** overwrite a variable the
+environment already holds, which is the property that matters: Docker and CI
+keep winning, and a `.env` forgotten on a laptop cannot quietly redirect a
+deployed API. That was verified rather than assumed.
 
-**The web reads `.env` files, but inlines them at build time.** Vite does this
-natively, so `web/.env.local` works — but `VITE_API_URL` is baked into the
-bundle when `vite build` runs. Changing it later means rebuilding, not
-restarting. `web/Dockerfile` takes no build argument for it today, so the
-published image always points at `http://localhost:3000`.
+Everything is read early enough. The database uri and the session secret are
+read inside factories that Nest calls while it builds the app, not while the
+files are imported, so loading the file before `bootstrap` covers all four.
+
+**The web inlines its variables at build time.** Vite reads `.env` files
+natively, but `VITE_API_URL` is baked into the bundle when `vite build` runs:
+changing it means rebuilding, not restarting. `web/Dockerfile` takes no build
+argument for it today, so the published image always points at
+`http://localhost:3000`.
 
 ### Running against a cloud database, without Docker
 

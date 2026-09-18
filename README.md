@@ -133,11 +133,16 @@ Everything has a working default, so the commands above need no configuration.
 
 Without `JWT_SECRET` the API logs a warning and signs tokens with a random secret, which means a restart invalidates them. Set it to keep sessions across restarts.
 
-Two things to know before overriding any of these. The API reads `process.env`
-directly, so a `.env` file in `api/` does nothing: set the variables in the
-shell that starts it. The web is the opposite — Vite reads `web/.env.local` on
-its own, but bakes `VITE_API_URL` into the bundle at build time, so changing it
-means rebuilding rather than restarting.
+Each project ships a template, and neither file is committed:
+
+```bash
+cp api/.env.example api/.env && cp web/.env.example web/.env.local
+```
+
+What is already in the environment always wins over those files, so Docker and
+CI are unaffected by them. One thing to know: the web bakes `VITE_API_URL` into
+the bundle when it builds, so changing it means rebuilding rather than
+restarting.
 
 [`DECISIONS.md`](DECISIONS.md#4-environment-and-running-it-your-way) has the
 recipes, including running against MongoDB Atlas with no Docker.

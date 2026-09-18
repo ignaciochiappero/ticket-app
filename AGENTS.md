@@ -112,10 +112,11 @@ If a skill conflicts with this file, this file wins.
 
 [`DECISIONS.md`](DECISIONS.md) is the reasoning behind the shape of this
 repository: the data model and why the history is embedded, the state machine,
-what was built instead of what, how environment variables are read (the API
-ignores `.env` files, the web inlines them at build time), how to add a feature
-without fighting the conventions, what breaks at scale, the debt taken on
-knowingly, and what is and is not tested. Read it before proposing a structural
+what was built instead of what, how environment variables are read (there is no
+config library; `api/.env` works through `process.loadEnvFile()` and never
+overrides the real environment, and the web inlines its own at build time), how
+to add a feature without fighting the conventions, what breaks at scale, the
+debt taken on knowingly, and what is and is not tested. Read it before proposing a structural
 change, and update it in the same commit when one lands.
 
 `.agents/context/` stores project knowledge: domain, decisions and data model.
