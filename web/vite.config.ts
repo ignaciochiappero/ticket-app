@@ -14,10 +14,13 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    // One jsdom environment per worker is expensive. Left unbounded, vitest
-    // spawns one per core, and on a machine that is short of memory the OS
-    // kills the extras: the run then reports "passed" for the files that did
-    // run and says nothing about the ones that never started.
-    maxWorkers: 4,
+    // Every worker pays for its own jsdom, and a machine that is short of
+    // memory cannot start several: vitest then reports "Test Files 4 passed
+    // (10)", a line that says passed while six files never ran. One worker at
+    // a time takes about twenty seconds instead of eight, which is a fair
+    // price for a number that can be believed. This runs before a push, not
+    // before every commit, so the twelve seconds buy a lot and cost little.
+    pool: 'forks',
+    maxWorkers: 1,
   },
 });

@@ -39,15 +39,39 @@ Your training data may predate these versions. Check the installed code or the o
 
 API docs (Swagger UI): `http://localhost:3000/docs`. The OpenAPI JSON is at `/docs-json`.
 
-| Task                                           | Command                |
-| ---------------------------------------------- | ---------------------- |
-| Install everything                             | `pnpm install`         |
-| Full stack in Docker                           | `pnpm run start`       |
-| Stop it                                        | `pnpm run stop`        |
-| Dev servers (MongoDB + API + web)              | `pnpm run dev`         |
-| Format check, lint and unit tests (pre-commit) | `pnpm run check`       |
-| Format every file                              | `pnpm run format`      |
-| API e2e tests (needs MongoDB)                  | `pnpm -C api test:e2e` |
+Every command below runs from the repository root and covers both projects.
+
+| Task                                         | Command                |
+| -------------------------------------------- | ---------------------- |
+| Install everything                           | `pnpm install`         |
+| Full stack in Docker                         | `pnpm run start`       |
+| Stop it                                      | `pnpm run stop`        |
+| Dev servers (MongoDB + API + web)            | `pnpm run dev`         |
+| Everything, as the pre-push hook runs it     | `pnpm run check`       |
+| Format, lint and types (the pre-commit hook) | `pnpm run check:quick` |
+| Build both projects                          | `pnpm run build`       |
+| Lint both projects                           | `pnpm run lint`        |
+| Typecheck both projects                      | `pnpm run typecheck`   |
+| Unit tests for both projects                 | `pnpm run test`        |
+| Format every file                            | `pnpm run format`      |
+| API e2e tests (needs MongoDB)                | `pnpm -C api test:e2e` |
+
+The gate has two levels, because a commit is cheap and frequent while a push
+is not. `check:quick` is `format:check`, `lint` and `typecheck`: about ten
+seconds, no browser environment, and it catches the mistakes that actually
+escape, a broken import or a changed type, by name rather than as some
+unrelated test failing later. It runs on every commit. `check` adds the unit
+tests on top and runs before a push, so the full suite is paid for once per
+batch of commits instead of once per commit.
+
+Neither hook needs MongoDB: `pnpm -r test` runs only `*.spec.ts`, which are
+pure unit tests. The e2e suite (`*.e2e-spec.ts`) is the one that needs a
+database, and it has its own config and its own command.
+
+The recursive commands take one project at a time, and the web tests use a
+single worker, because several jsdom environments at once exhaust the memory
+on a normal laptop and vitest then reports the files that never started as
+though they had passed.
 
 ## API structure
 
