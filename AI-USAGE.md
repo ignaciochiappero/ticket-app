@@ -10,10 +10,23 @@
 - **`AGENTS.md`:** stack and versions, commands, rules, skills, agent persona, strict git rules and workflow. `CLAUDE.md` only imports it, so Cursor and Claude Code read the same rules.
 - **`openspec/`:** Spec-Driven Development artifacts for each change: proposal, specs, design, tasks and verification. Every spec scenario has at least one test with the same name.
 - **Skills committed to the repo, not just `skills-lock.json`:** when restoring, the CLI downloads them again from the default branch of their source repo and does not verify the hash, so the lock does not guarantee the content I reviewed.
+- **`.agents/context/`:** the onboarding path for whoever arrives next, agent or person — the domain, the data model with its invariants, and a glossary that maps the Spanish interface to the English code. Without that last one an agent either translates an identifier and breaks the code, or writes English into a screen and breaks the product.
+- **Four skills of my own** beside the vendored ones, and they win when the two disagree: `ticket-app-new-feature` (the path from a spec to a merged pull request), plus one each for the API, the web app and testing. They are written from the mistakes this project actually made, not from general advice, which is why the testing one opens with the ways a test run reports passing while doing nothing.
+
+How I worked with it, which mattered more than any of the above:
+
+- **One feature per branch, reviewed before the next.** No sub-agents, no parallel work I could not read.
+- **I ran every git command myself.** The agent shows the exact command and waits. It broke this rule once, with a `git mv`, and disclosed it.
+- **Specs before code.** No implementation until the proposal, specs and design for that change were approved, and every spec scenario maps to a test with the same name.
+- **It had to verify, not assert.** "It works" was not accepted without a command and its output, which is how the silent test-runner failure and my own wrong layout diagnosis were both caught.
 
 ## What I fully delegated
 
 - Verifying every command and configuration in a scratch folder before handing it to me: scaffolds, Dockerfiles, hooks and skills.
+- **Writing the code once a decision was made.** I decided the shape; the agent typed it. Every file in `api/src` and `web/src` was written by it and reviewed by me.
+- **Mechanical work across many files.** Translating the whole interface to Spanish and updating the roughly eighty test assertions that depended on the old copy; swapping the query DTOs when a route's contract changed; repointing every importer when a module moved.
+- **Empirical verification.** Rather than accepting "this works", I had it prove each claim: four concurrent agents taking one ticket over six runs, a category-delete race over five, mutation-testing the history suite by removing the `$push`, reading the built OpenAPI document instead of assuming the Swagger plugin ran, dragging a real card in a real browser, and measuring a misaligned row with `getBoundingClientRect()` after two wrong diagnoses from reading class names.
+- **Writing its own onboarding.** `.agents/context/` and the four `ticket-app-*` skills, so the next agent starts with this context instead of rediscovering it.
 
 ## Where I intervened and why
 
@@ -22,10 +35,30 @@
 - **Skills:** the AI had dropped the NestJS and React skills. I asked to include them, and we picked alternatives that fit the stack.
 - **Agentic setup:** the AI suggested postponing part of it because of the deadline. I decided to set it up from the start.
 
+Then, once code was being written, the interventions changed character. The planning ones were about what to build; these were about the agent being wrong, or too slow, or too cautious:
+
+- **Product calls it argued with.** I swapped the metrics dashboard for search and filters, because with thousands of tickets the pain is finding one, not counting them. It pushed back twice, quoting the exercise's own context paragraph. I kept the swap and had it write down what the swap costs.
+- **Decisions it took without asking.** It discarded React Router and a component library on its own and recorded that as a design decision. I reversed both: filters and ticket codes belong in the URL, and a component library keeps the interface consistent. This is the intervention I would most want to avoid repeating — it is cheap to fix a wrong answer and expensive to fix a decision you never knew was taken.
+- **Where it was too cautious.** With the deadline close I ordered both optional features built with no new tests. It raised the tradeoff once, which was right, and then did it — and verified the result by hand instead, which was the correct compromise. I would rather it argue once than either refuse or comply silently.
+- **Where I caught it lying to itself.** Its own pre-commit gate never typechecked, so nothing caught a broken import. I told it things were escaping; turning the typecheck on immediately found three files importing a module it had deleted. Twice more that day the typecheck caught an API it had assumed (`poolOptions`, removed in Vitest 4) and a translated value that was compared rather than rendered.
+- **Where its diagnosis was wrong and mine was too.** A row of filters looked misaligned. It blamed control heights twice, from reading class names. Measured in the browser, the heights were identical the whole time: Radix renders a hidden select beside its trigger, so a `space-y` rule spaced that too. The lesson I made it write into a skill: measure, do not read.
+- **Reliability of its own tooling.** A test run reported `6 passed (8)` — two files never started because the machine was out of memory — and it initially treated that as a pass. It now reads both numbers, and the trap is documented.
+
 ## AI output I rejected
 
 - **Skills reviewed and dropped:** `nestjs-best-practices` (Jest, TypeORM and Prisma examples; pushes migrations, JWT and microservices), `nestjs-expert` (JWT, TypeORM, Prisma, Swagger and GraphQL) and `react-vite-best-practices` (pushes lazy loading, React Router, Zustand and TanStack).
 - **Incomplete `.gitignore`:** it did not include `*.tsbuildinfo`. The file got committed and I removed it with `git rm --cached`.
+
+From the implementation phase:
+
+- **An httpOnly cookie for the session token**, twice. It left the token out of the login response, which makes Swagger's Authorize button useless, then offered to accept both a cookie and a bearer header. I cut it to one standard mechanism: login returns only the token, every client sends it as a bearer header, and the user's data comes from `GET /auth/me`. No session state, no logout endpoint.
+- **A metrics dashboard** as an optional feature. Replaced with search and filters.
+- **A table for the ticket board.** I asked for a Jira-style board, one column per state with cards, which reads as a queue rather than a report.
+- **A default board that hides resolved tickets.** It proposed this while the board has a Resolved column — the column would have been permanently empty and resolving a ticket would have made it vanish from the board that just moved it there. Replaced with the last ten completed and a "Ver más", which is what Jira does.
+- **A lint config that silently disabled thirty-two React rules**, including `rules-of-hooks` at error level, in order to hide two cosmetic warnings from vendored shadcn files. Rejected; the warnings were suppressed with two scoped inline comments instead.
+- **`process.loadEnvFile()` presented as safe without evidence.** I made it prove that the file does not override variables already in the environment before I accepted it, because if it did, a forgotten `.env` could redirect a deployed API.
+- **Its own attribution line in a pull request description.** I do not ship AI attribution on my deliverables, and it had read the rule as applying only to commits.
+- **Overwriting two committed files** it had not read first: `web/.oxlintrc.json` and the `pre-push` hook, the second of which blocks direct pushes to `main`. Both restored from git. The cause was a diagnostic command of its own whose fallback made a missing tool look like a missing file.
 
 ## Log
 
