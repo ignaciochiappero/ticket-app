@@ -25,7 +25,7 @@ import {
   CurrentUser,
   Roles,
 } from '../auth/auth.decorators.js';
-import { PaginationQueryDto } from '../pagination/dto/pagination-query.dto.js';
+import { TicketQueryDto } from './dto/ticket-query.dto.js';
 import { CreateTicketDto } from './dto/create-ticket.dto.js';
 import { PaginatedTicketsDto } from './dto/paginated-tickets.dto.js';
 import { TicketDto } from './dto/ticket.dto.js';
@@ -63,7 +63,7 @@ export class TicketsController {
   @Get()
   @ApiBadRequestResponse({ description: 'Invalid page or limit' })
   findAll(
-    @Query() query: PaginationQueryDto,
+    @Query() query: TicketQueryDto,
     @CurrentUser() user: ActingUser,
   ): Promise<PaginatedTicketsDto> {
     return this.ticketsService.findAll(query, user);

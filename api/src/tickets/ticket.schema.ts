@@ -91,6 +91,12 @@ export class Ticket {
   @Prop({ type: Date, default: null })
   deletedAt: Date | null;
 
+  // When the ticket was resolved, null until it is. "The last ten completed"
+  // has to mean the last ten to be completed: a ticket opened in March and
+  // resolved today is recent work, and sorting by `createdAt` would bury it.
+  @Prop({ type: Date, default: null })
+  resolvedAt: Date | null;
+
   @Prop({ type: [HistoryEventSchema], required: true })
   history: HistoryEvent[];
 }
@@ -102,3 +108,8 @@ TicketSchema.index({ code: 1 }, { unique: true });
 
 // A requester only ever reads their own tickets, oldest or newest first.
 TicketSchema.index({ requesterId: 1, createdAt: 1 });
+
+// The resolved column asks for one state sorted by one key, over and over as
+// somebody presses "Show more". Without this the query walks every resolved
+// ticket to return ten of them.
+TicketSchema.index({ state: 1, resolvedAt: -1 });
