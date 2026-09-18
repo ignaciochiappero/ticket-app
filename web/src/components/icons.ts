@@ -1,5 +1,6 @@
 import {
   ChevronDown,
+  SlidersHorizontal,
   ArrowLeft,
   Check,
   Clock,
@@ -45,6 +46,7 @@ export const icon = {
   resolve: Check,
   drag: GripVertical,
   more: ChevronDown,
+  filter: SlidersHorizontal,
 
   // Ticket facts
   person: User,

@@ -130,6 +130,48 @@ describe('ticket-board-scope (e2e)', () => {
     await requester.get('/tickets?state=archived').expect(400);
   });
 
+  it('A ticket is found by its code or its title', async () => {
+    const printer = await open(requester, 'Printer on floor 3 is jammed');
+    await open(requester, 'VPN drops every hour');
+
+    const byCode = await board(requester, `?q=${printer.code}`);
+    const byTitle = await board(requester, '?q=floor+3');
+    const byCase = await board(requester, '?q=PRINTER');
+
+    expect(codes(byCode)).toEqual([printer.code]);
+    expect(codes(byTitle)).toEqual([printer.code]);
+    expect(codes(byCase)).toEqual([printer.code]);
+  });
+
+  it('A search term is matched literally, not as a pattern', async () => {
+    await open(requester, 'Printer on floor 3 is jammed');
+
+    // Unescaped, `.*` matches every title. It has to find nothing instead.
+    const wildcard = await board(requester, '?q=.*');
+
+    expect(wildcard.items).toHaveLength(0);
+    expect(wildcard.total).toBe(0);
+  });
+
+  it('A search term narrows the column it was asked for', async () => {
+    const done = await open(requester, 'Printer on floor 3 is jammed');
+    await open(requester, 'Printer cartridge empty');
+    await resolve(done.id);
+
+    const active = await board(requester, '?state=open,in_progress&q=printer');
+
+    expect(codes(active)).toEqual(['TCK-2']);
+    expect(active.total).toBe(1);
+  });
+
+  it('A search never reaches another requester ticket', async () => {
+    await open(other, 'Printer on floor 3 is jammed');
+
+    const found = await board(requester, '?q=printer');
+
+    expect(found.items).toHaveLength(0);
+  });
+
   it('An empty state filter is the same as asking for nothing', async () => {
     const ticket = await open(requester, 'Printer jammed');
 

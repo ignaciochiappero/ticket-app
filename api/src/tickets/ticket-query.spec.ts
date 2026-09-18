@@ -63,6 +63,50 @@ describe('boardQuery', () => {
     }
   });
 
+  it('a search term matches a code from its start', () => {
+    const { filter } = boardQuery({ q: 'TCK-14' }, SCOPE);
+
+    // Anchored: a code is quoted whole, and `14` should not match `TCK-140`
+    // from the middle of nowhere.
+    expect(filter.$or).toEqual([
+      { code: { $regex: '^TCK\\-14', $options: 'i' } },
+      { title: { $regex: 'TCK\\-14', $options: 'i' } },
+    ]);
+  });
+
+  it('a search term matches any part of a title, ignoring case', () => {
+    const { filter } = boardQuery({ q: 'printer' }, SCOPE);
+
+    expect(filter.$or).toEqual([
+      { code: { $regex: '^printer', $options: 'i' } },
+      { title: { $regex: 'printer', $options: 'i' } },
+    ]);
+  });
+
+  it('a search term cannot smuggle in a regular expression', () => {
+    // Without escaping, `.*` matches everything and `(a+)+$` is a denial of
+    // service. The term is data, not a pattern.
+    const { filter } = boardQuery({ q: '.*(a+)+$' }, SCOPE);
+
+    expect(filter.$or).toEqual([
+      { code: { $regex: '^\\.\\*\\(a\\+\\)\\+\\$', $options: 'i' } },
+      { title: { $regex: '\\.\\*\\(a\\+\\)\\+\\$', $options: 'i' } },
+    ]);
+  });
+
+  it('a search term narrows the state filter instead of replacing it', () => {
+    const { filter } = boardQuery({ state: ['resolved'], q: 'vpn' }, SCOPE);
+
+    expect(filter.state).toEqual({ $in: ['resolved'] });
+    expect(filter.$or).toBeDefined();
+    expect(filter.deletedAt).toBe(null);
+  });
+
+  it('a blank search term is no filter at all', () => {
+    expect(boardQuery({ q: '   ' }, SCOPE).filter).toEqual(SCOPE);
+    expect(boardQuery({ q: '' }, SCOPE).filter).toEqual(SCOPE);
+  });
+
   it('an empty state list is treated as no filter at all', () => {
     // ?state= with nothing after it must not ask Mongo for `$in: []`, which
     // matches no document and would answer an empty board.

@@ -1,10 +1,17 @@
 import { ApiError } from '@/api/client';
-import type { Category, Page, TicketInput, TicketSummary } from '@/api/types';
+import type {
+  Category,
+  Page,
+  TicketInput,
+  TicketSummary,
+  User,
+} from '@/api/types';
 import { icon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/auth-context';
 import { listCategories } from '@/features/categories/api';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import {
   createTicket,
   listTickets,
@@ -12,7 +19,12 @@ import {
   resolveTicket,
   takeTicket,
 } from './api';
+import { listUsers } from '@/features/users/api';
 import { Board } from './components/Board';
+import {
+  BoardFilters,
+  type BoardFilterValues,
+} from './components/BoardFilters';
 import { TicketForm } from './components/TicketForm';
 import { ACTIVE_STATES } from './states';
 import type { Move } from './transitions';
@@ -27,8 +39,8 @@ const RUN: Record<Move, (id: string) => Promise<unknown>> = {
 const RESOLVED_STEP = 10;
 
 // The API refuses a bigger page, on purpose: past this the answer is a filter,
-// not a longer list. Until Phase 7 lands, the board says so instead of
-// pretending the rest is not there.
+// not a longer list: the search box is how you get past it. Until then the
+// board says what it is hiding instead of pretending the rest is not there.
 const MAX_LIMIT = 100;
 
 interface BoardData {
@@ -43,6 +55,7 @@ interface BoardData {
  */
 export function TicketsPage() {
   const { user } = useAuth();
+  const [params, setParams] = useSearchParams();
   // Both columns are fetched together and drawn together, so they are one
   // piece of state: one null check then narrows both.
   const [board, setBoard] = useState<BoardData | null>(null);
@@ -58,6 +71,53 @@ export function TicketsPage() {
 
   const isRequester = user?.role === 'requester';
 
+  // Every filter lives in the URL, so a filtered board is a link somebody can
+  // send and the back button undoes a filter like any other navigation.
+  const applied = useMemo(
+    () => ({
+      q: params.get('q') ?? '',
+      requester: params.get('requester') ?? '',
+      assignee: params.get('assignee') ?? '',
+      order: params.get('order') ?? '',
+    }),
+    [params],
+  );
+
+  // The same filters, as a query string the API understands. The state and
+  // limit are added per column, because those differ between them.
+  const filters = useMemo(
+    () =>
+      Object.entries(applied)
+        .filter(([, value]) => value)
+        .map(([key, value]) => `&${key}=${encodeURIComponent(value)}`)
+        .join(''),
+    [applied],
+  );
+
+  // The dropdowns need names, and there are eight people in total, so this is
+  // fetched once rather than with every board reload.
+  const [people, setPeople] = useState<User[]>([]);
+  useEffect(() => {
+    if (isRequester) {
+      return;
+    }
+    // oxlint-disable-next-line react/set-state-in-effect
+    listUsers()
+      .then(setPeople)
+      .catch(() => setPeople([]));
+  }, [isRequester]);
+
+  /** Apply writes the filters into the URL; the effect that reads it asks. */
+  const apply = (values: BoardFilterValues) => {
+    const next = new URLSearchParams();
+    for (const [key, value] of Object.entries(values)) {
+      if (value.trim()) {
+        next.set(key, value.trim());
+      }
+    }
+    setParams(next);
+  };
+
   const load = useCallback(async () => {
     try {
       // One request per column rather than one page shared between them: a
@@ -65,8 +125,10 @@ export function TicketsPage() {
       // "In progress" looking empty while tickets sit in it.
       // Categories name the chip on each card and fill the form's dropdown.
       const [activePage, resolvedPage, categoryPage] = await Promise.all([
-        listTickets(`?state=${ACTIVE_STATES.join(',')}&limit=${MAX_LIMIT}`),
-        listTickets(`?state=resolved&limit=${resolvedLimit}`),
+        listTickets(
+          `?state=${ACTIVE_STATES.join(',')}&limit=${MAX_LIMIT}${filters}`,
+        ),
+        listTickets(`?state=resolved&limit=${resolvedLimit}${filters}`),
         listCategories(),
       ]);
       setBoard({ active: activePage, resolved: resolvedPage });
@@ -75,7 +137,7 @@ export function TicketsPage() {
     } catch {
       setLoadError('The tickets could not be loaded.');
     }
-  }, [resolvedLimit]);
+  }, [resolvedLimit, filters]);
 
   useEffect(() => {
     // oxlint-disable-next-line react/set-state-in-effect
@@ -140,6 +202,14 @@ export function TicketsPage() {
           )}
         </div>
       </div>
+
+      <BoardFilters
+        applied={applied}
+        people={people}
+        showPeople={!isRequester}
+        onApply={apply}
+        onClear={() => setParams(new URLSearchParams())}
+      />
 
       {composing && (
         <div className="rounded-panel bg-surface p-6">
