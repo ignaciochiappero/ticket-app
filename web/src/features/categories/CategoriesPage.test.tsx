@@ -1,6 +1,12 @@
 import { ApiError } from '@/api/client';
 import type { Category, Page } from '@/api/types';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CategoriesPage } from './CategoriesPage';
 
@@ -89,7 +95,7 @@ describe('CategoriesPage', () => {
     fireEvent.change(nameField(), { target: { value: '  Printers  ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add category' }));
 
-    await vi.waitFor(() =>
+    await waitFor(() =>
       expect(createCategory).toHaveBeenCalledWith('Printers'),
     );
     expect(listCategories).toHaveBeenCalledTimes(2);
@@ -123,7 +129,7 @@ describe('CategoriesPage', () => {
     fireEvent.change(nameField(), { target: { value: 'Accounts' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    await vi.waitFor(() =>
+    await waitFor(() =>
       expect(renameCategory).toHaveBeenCalledWith('1', 'Accounts'),
     );
   });
@@ -138,6 +144,6 @@ describe('CategoriesPage', () => {
     expect(deleteCategory).not.toHaveBeenCalled();
     fireEvent.click(row.getByRole('button', { name: 'Confirm delete' }));
 
-    await vi.waitFor(() => expect(deleteCategory).toHaveBeenCalledWith('1'));
+    await waitFor(() => expect(deleteCategory).toHaveBeenCalledWith('1'));
   });
 });

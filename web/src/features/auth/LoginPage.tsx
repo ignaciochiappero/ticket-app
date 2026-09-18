@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate } from 'react-router';
-import { useAuth } from './AuthContext';
+import { useAuth } from './auth-context';
 import { loginSchema, type LoginValues } from './validation';
 
 export function LoginPage() {

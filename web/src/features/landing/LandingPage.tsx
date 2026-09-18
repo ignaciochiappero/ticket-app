@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useAuth } from '@/features/auth/auth-context';
 import { Link, Navigate } from 'react-router';
 
 /** The front door: what this is, and the way in. Nothing else. */
