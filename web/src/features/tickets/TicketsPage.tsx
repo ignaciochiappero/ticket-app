@@ -135,7 +135,7 @@ export function TicketsPage() {
       setCategories(categoryPage.items);
       setLoadError(null);
     } catch {
-      setLoadError('The tickets could not be loaded.');
+      setLoadError('No se pudieron cargar los tickets.');
     }
   }, [resolvedLimit, filters]);
 
@@ -165,7 +165,7 @@ export function TicketsPage() {
       setMoveError(
         caught instanceof ApiError
           ? caught.message
-          : 'That move did not go through. Try again.',
+          : 'No se pudo mover el ticket. Intentá de nuevo.',
       );
     } finally {
       setBusy(false);
@@ -180,8 +180,8 @@ export function TicketsPage() {
           <h1 className="text-2xl font-medium tracking-tight">Tickets</h1>
           <p className="mt-1 text-sm text-ink-muted">
             {board
-              ? `${board.active.total + board.resolved.total} in total, newest first in each column.`
-              : 'Loading…'}
+              ? `${board.active.total + board.resolved.total} en total, los más nuevos primero en cada columna.`
+              : 'Cargando…'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -192,12 +192,12 @@ export function TicketsPage() {
             onClick={() => void load()}
           >
             <icon.refresh aria-hidden="true" />
-            Refresh
+            Actualizar
           </Button>
           {isRequester && !composing && (
             <Button onClick={() => setComposing(true)}>
               <icon.add aria-hidden="true" />
-              New ticket
+              Nuevo ticket
             </Button>
           )}
         </div>
@@ -213,7 +213,7 @@ export function TicketsPage() {
 
       {composing && (
         <div className="rounded-panel bg-surface p-6">
-          <h2 className="mb-5 text-lg font-medium">New ticket</h2>
+          <h2 className="mb-5 text-lg font-medium">Nuevo ticket</h2>
           <TicketForm
             categories={categories}
             onSubmit={open}
@@ -241,17 +241,17 @@ export function TicketsPage() {
           role="status"
           className="rounded-tile bg-surface px-3 py-2 text-sm text-ink-muted"
         >
-          Showing {board.active.items.length} of {board.active.total} active
-          tickets. Narrowing the board is the way to see the rest.
+          Se muestran {board.active.items.length} de {board.active.total}{' '}
+          tickets activos. Filtrá el tablero para ver el resto.
         </p>
       )}
 
       {board && board.active.total + board.resolved.total === 0 && (
         <div className="rounded-panel bg-surface p-8 text-sm text-ink-muted">
-          No tickets yet.{' '}
+          Todavía no hay tickets.{' '}
           {isRequester
-            ? 'Open one and it will show up here.'
-            : 'The queue is empty.'}
+            ? 'Abrí uno y va a aparecer acá.'
+            : 'La cola está vacía.'}
         </div>
       )}
 

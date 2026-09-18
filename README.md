@@ -123,18 +123,50 @@ AGENTS.md      the rules the AI follows in this repository
 
 Everything has a working default, so the commands above need no configuration.
 
-| Variable      | Default                             | Used by    |
-| ------------- | ----------------------------------- | ---------- |
-| `MONGODB_URI` | `mongodb://localhost:27017/tickets` | API        |
-| `PORT`        | `3000`                              | API        |
-| `WEB_ORIGIN`  | `http://localhost:5173`             | API (CORS) |
-| `JWT_SECRET`  | a random secret per start           | API        |
+| Variable       | Default                             | Used by    |
+| -------------- | ----------------------------------- | ---------- |
+| `MONGODB_URI`  | `mongodb://localhost:27017/tickets` | API        |
+| `PORT`         | `3000`                              | API        |
+| `WEB_ORIGIN`   | `http://localhost:5173`             | API (CORS) |
+| `JWT_SECRET`   | a random secret per start           | API        |
+| `VITE_API_URL` | `http://localhost:3000`             | web        |
 
 Without `JWT_SECRET` the API logs a warning and signs tokens with a random secret, which means a restart invalidates them. Set it to keep sessions across restarts.
+
+Each project ships a template, and neither file is committed:
+
+```bash
+cp api/.env.example api/.env && cp web/.env.example web/.env.local
+```
+
+What is already in the environment always wins over those files, so Docker and
+CI are unaffected by them. One thing to know: the web bakes `VITE_API_URL` into
+the bundle when it builds, so changing it means rebuilding rather than
+restarting.
+
+[`DECISIONS.md`](DECISIONS.md#4-environment-and-running-it-your-way) has the
+recipes, including running against MongoDB Atlas with no Docker.
 
 ## Status
 
 The work is split into batches, tracked in [`openspec/changes/ticket-system-v1/tasks.md`](openspec/changes/ticket-system-v1/tasks.md).
 
-- **Done**: project setup, API foundation, seeded users, login and role enforcement, ticket categories.
-- **In progress**: ticket lifecycle and history, the web boards, comments, and ticket search with filters.
+**Done.** Project setup, API foundation, seeded users, login and role
+enforcement, ticket categories, the ticket lifecycle with its audit history,
+the web board with drag and drop, the ticket detail with its timeline, and both
+optional features: comments, and search with filters.
+
+**Not done**, and each one for a reason rather than an oversight:
+
+- **Date-range filters.** The query builder has the shape for them; they were
+  the declared first thing to drop when the deadline bit.
+- **Automated tests for the order, requester and assignee filters, and for
+  comments.** Written under deadline with tests deliberately skipped, then
+  verified by hand against the running stack — ten checks and eleven checks
+  respectively, including that a requester cannot filter their way into
+  somebody else's tickets. The first debt to pay.
+- **A build argument for the web image's API URL**, so the published image
+  always points at `http://localhost:3000`.
+
+[`DECISIONS.md`](DECISIONS.md) explains the reasoning behind all of it,
+including what would break at fifty thousand tickets a month.

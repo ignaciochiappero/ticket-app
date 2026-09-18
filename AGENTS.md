@@ -99,17 +99,44 @@ though they had passed.
 
 ## Skills
 
-Skills live in `.agents/skills/` (committed, read by Cursor and most agents). `.claude/skills/` is a local, git-ignored copy for Claude Code. Do not edit skill files: they are third-party content recorded in `skills-lock.json`.
+Skills live in `.agents/skills/` (committed, read by Cursor and most agents). `.claude/skills/` is a local, git-ignored copy for Claude Code.
+
+**Ours, and the ones to read first.** They describe this repository rather than a library, and they are ours to edit — keep them current when a convention changes.
+
+- `ticket-app-new-feature`: the end-to-end path from a spec to a merged pull request, and the decision points that cost most if taken late. Start here for anything new.
+- `ticket-app-api`: adding or changing an endpoint. Read before touching `api/`.
+- `ticket-app-web`: adding or changing a screen. Read before touching `web/`.
+- `ticket-app-testing`: which level to test at, how to drive the UI, and the traps that make a green run a lie.
+
+**Third-party**, recorded in `skills-lock.json`. Do not edit these files.
 
 - `mongodb-schema-design`: data modeling decisions.
 - `nestjs-patterns`: API structure. Ignore its JWT, Prisma and ConfigModule guidance unless a task asks for it.
 - `vercel-react-best-practices`: React code. Its `server-*` rules do not apply to this Vite SPA.
 - `vitest`: writing tests.
 
-If a skill conflicts with this file, this file wins.
+If a skill conflicts with this file, this file wins. If a third-party skill conflicts with one of ours, ours wins: it knows this codebase.
 
 ## Project context
 
-`.agents/context/` stores project knowledge: domain, decisions and data model.
+[`DECISIONS.md`](DECISIONS.md) is the reasoning behind the shape of this
+repository: the data model and why the history is embedded, the state machine,
+what was built instead of what, how environment variables are read (there is no
+config library; `api/.env` works through `process.loadEnvFile()` and never
+overrides the real environment, and the web inlines its own at build time), how
+to add a feature without fighting the conventions, what breaks at scale, the
+debt taken on knowingly, and what is and is not tested. Read it before proposing a structural
+change, and update it in the same commit when one lands.
+
+[`.agents/context/`](.agents/context/README.md) is the onboarding path for
+somebody — or some agent — arriving with no history. Start at its `README.md`,
+which says what to read and in what order:
+
+- `domain.md`: who uses this, what a ticket is, what may happen to it, and why
+  there is no reopening and no way to edit history.
+- `data-model.md`: the four collections, their fields and indexes, and the
+  five invariants that must never break.
+- `glossary.md`: the Spanish the interface speaks against the English the code
+  speaks. Read it before writing a string anybody will see.
 
 Keep this file and `.agents/context/` in sync with the repository. When a change affects the stack, structure, commands, data model or conventions, update them in the same commit.

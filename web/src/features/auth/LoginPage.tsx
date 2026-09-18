@@ -31,7 +31,7 @@ export function LoginPage() {
         message:
           error instanceof ApiError
             ? error.message
-            : 'Something went wrong. Try again.',
+            : 'Algo salió mal. Intentá de nuevo.',
       });
     }
   });
@@ -45,14 +45,14 @@ export function LoginPage() {
         >
           Ticket App
         </Link>
-        <h1 className="mt-3 text-2xl font-medium tracking-tight">Sign in</h1>
+        <h1 className="mt-3 text-2xl font-medium tracking-tight">Ingresar</h1>
         <p className="mt-2 text-sm text-ink-muted">
-          Use one of the demo users from the README.
+          Usá uno de los usuarios de demo del README.
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5" noValidate>
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Usuario</Label>
             <Input
               id="username"
               autoComplete="username"
@@ -68,7 +68,7 @@ export function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Contraseña</Label>
             <Input
               id="password"
               type="password"
@@ -93,7 +93,7 @@ export function LoginPage() {
           )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Signing in…' : 'Sign in'}
+            {isSubmitting ? 'Ingresando…' : 'Ingresar'}
           </Button>
         </form>
       </div>

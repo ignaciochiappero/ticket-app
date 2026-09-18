@@ -35,7 +35,7 @@ const STARTERS: Category[] = [
 ];
 
 function nameField() {
-  return screen.getByLabelText('Category name');
+  return screen.getByLabelText('Nombre de la categoría');
 }
 
 function rowFor(name: string) {
@@ -56,8 +56,8 @@ describe('CategoriesPage', () => {
     expect(await screen.findByText('Access')).toBeDefined();
     expect(screen.getByText('Hardware')).toBeDefined();
     // The lock is the reason a row cannot be touched, so the row has to say so.
-    expect(rowFor('Hardware').textContent).toContain('In use');
-    expect(rowFor('Access').textContent).not.toContain('In use');
+    expect(rowFor('Hardware').textContent).toContain('En uso');
+    expect(rowFor('Access').textContent).not.toContain('En uso');
   });
 
   it('blocks rename and delete on a category a ticket has used', async () => {
@@ -65,7 +65,7 @@ describe('CategoriesPage', () => {
     await screen.findByText('Hardware');
 
     const locked = within(rowFor('Hardware'));
-    for (const action of ['Rename', 'Delete']) {
+    for (const action of ['Renombrar', 'Eliminar']) {
       expect(
         locked.getByRole('button', { name: action }).hasAttribute('disabled'),
       ).toBe(true);
@@ -74,7 +74,7 @@ describe('CategoriesPage', () => {
     // The unused one stays editable.
     const open = within(rowFor('Access'));
     expect(
-      open.getByRole('button', { name: 'Rename' }).hasAttribute('disabled'),
+      open.getByRole('button', { name: 'Renombrar' }).hasAttribute('disabled'),
     ).toBe(false);
   });
 
@@ -82,9 +82,9 @@ describe('CategoriesPage', () => {
     render(<CategoriesPage />);
     await screen.findByText('Access');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add category' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar categoría' }));
 
-    expect(await screen.findByText('Enter a name')).toBeDefined();
+    expect(await screen.findByText('Ingresá un nombre')).toBeDefined();
     expect(createCategory).not.toHaveBeenCalled();
   });
 
@@ -93,7 +93,7 @@ describe('CategoriesPage', () => {
     await screen.findByText('Access');
 
     fireEvent.change(nameField(), { target: { value: '  Printers  ' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Add category' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar categoría' }));
 
     await waitFor(() =>
       expect(createCategory).toHaveBeenCalledWith('Printers'),
@@ -109,7 +109,7 @@ describe('CategoriesPage', () => {
     await screen.findByText('Access');
 
     fireEvent.change(nameField(), { target: { value: 'Hardware' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Add category' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar categoría' }));
 
     expect(
       await screen.findByText('A category with this name already exists'),
@@ -121,13 +121,13 @@ describe('CategoriesPage', () => {
     await screen.findByText('Access');
 
     fireEvent.click(
-      within(rowFor('Access')).getByRole('button', { name: 'Rename' }),
+      within(rowFor('Access')).getByRole('button', { name: 'Renombrar' }),
     );
     // The form switches to editing that row, prefilled: no second form to keep in step.
     expect((nameField() as HTMLInputElement).value).toBe('Access');
 
     fireEvent.change(nameField(), { target: { value: 'Accounts' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
     await waitFor(() =>
       expect(renameCategory).toHaveBeenCalledWith('1', 'Accounts'),
@@ -139,10 +139,10 @@ describe('CategoriesPage', () => {
     await screen.findByText('Access');
 
     const row = within(rowFor('Access'));
-    fireEvent.click(row.getByRole('button', { name: 'Delete' }));
+    fireEvent.click(row.getByRole('button', { name: 'Eliminar' }));
 
     expect(deleteCategory).not.toHaveBeenCalled();
-    fireEvent.click(row.getByRole('button', { name: 'Confirm delete' }));
+    fireEvent.click(row.getByRole('button', { name: 'Confirmar borrado' }));
 
     await waitFor(() => expect(deleteCategory).toHaveBeenCalledWith('1'));
   });

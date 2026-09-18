@@ -121,7 +121,7 @@ export function Board({
               ))}
               {cards.length === 0 && (
                 <p className="px-1 py-6 text-center text-xs text-ink-dim">
-                  Nothing here
+                  Nada por acá
                 </p>
               )}
               {state === 'resolved' && canShowMore && (
@@ -132,7 +132,7 @@ export function Board({
                   onClick={onShowMore}
                 >
                   <icon.more aria-hidden="true" />
-                  Show more
+                  Ver más
                 </Button>
               )}
             </div>

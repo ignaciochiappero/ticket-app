@@ -7,14 +7,14 @@ export const ticketSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(1, 'Give the ticket a title')
-    .max(120, 'Keep the title under 120 characters'),
+    .min(1, 'Ponele un título al ticket')
+    .max(120, 'El título no puede pasar de 120 caracteres'),
   description: z
     .string()
     .trim()
-    .min(1, 'Describe the problem')
-    .max(5000, 'Keep the description under 5000 characters'),
-  categoryId: z.string().min(1, 'The ticket needs a category'),
+    .min(1, 'Describí el problema')
+    .max(5000, 'La descripción no puede pasar de 5000 caracteres'),
+  categoryId: z.string().min(1, 'El ticket necesita una categoría'),
 });
 
 export type TicketValues = z.infer<typeof ticketSchema>;

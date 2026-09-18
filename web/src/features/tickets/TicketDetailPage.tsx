@@ -48,7 +48,7 @@ export function TicketDetailPage() {
       setError(
         caught instanceof ApiError
           ? caught.message
-          : 'The ticket could not be loaded.',
+          : 'No se pudo cargar el ticket.',
       );
     }
   }, [id]);
@@ -84,7 +84,7 @@ export function TicketDetailPage() {
       setActionError(
         caught instanceof ApiError
           ? caught.message
-          : 'Something went wrong. Try again.',
+          : 'Algo salió mal. Intentá de nuevo.',
       );
     } finally {
       setBusy(false);
@@ -99,13 +99,13 @@ export function TicketDetailPage() {
           {error}
         </p>
         <Link to="/tickets" className="text-sm text-ink-muted hover:text-ink">
-          Back to the board
+          Volver al tablero
         </Link>
       </section>
     );
   }
   if (!ticket) {
-    return <p className="text-sm text-ink-dim">Loading…</p>;
+    return <p className="text-sm text-ink-dim">Cargando…</p>;
   }
 
   // The interface offers only what the API would accept. The rules live in
@@ -125,7 +125,7 @@ export function TicketDetailPage() {
           className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
         >
           <icon.back className="size-4" aria-hidden="true" />
-          Board
+          Tablero
         </Link>
         <Button
           variant="ghost"
@@ -134,13 +134,13 @@ export function TicketDetailPage() {
           onClick={() => void load()}
         >
           <icon.refresh aria-hidden="true" />
-          Refresh
+          Actualizar
         </Button>
       </div>
 
       {editing ? (
         <div className="rounded-panel bg-surface p-6">
-          <h2 className="mb-5 text-lg font-medium">Edit {ticket.code}</h2>
+          <h2 className="mb-5 text-lg font-medium">Editar {ticket.code}</h2>
           <TicketForm
             categories={categories}
             initial={{
@@ -162,7 +162,7 @@ export function TicketDetailPage() {
             {ticket.title}
           </h1>
           <p className="text-sm text-ink-muted">
-            Opened by {ticket.requester.name}{' '}
+            Abierto por {ticket.requester.name}{' '}
             <time
               dateTime={ticket.createdAt}
               title={formatDateTime(ticket.createdAt)}
@@ -171,9 +171,9 @@ export function TicketDetailPage() {
             </time>
             {' · '}
             {ticket.assignee ? (
-              <>Assigned to {ticket.assignee.name}</>
+              <>Asignado a {ticket.assignee.name}</>
             ) : (
-              <span className="text-ink-dim">Unassigned</span>
+              <span className="text-ink-dim">Sin asignar</span>
             )}
           </p>
 
@@ -188,7 +188,7 @@ export function TicketDetailPage() {
                 }}
               >
                 <icon.edit aria-hidden="true" />
-                Edit
+                Editar
               </Button>
               {confirming ? (
                 <Button
@@ -197,7 +197,7 @@ export function TicketDetailPage() {
                   onClick={() => void remove()}
                 >
                   <icon.delete aria-hidden="true" />
-                  Confirm delete
+                  Confirmar borrado
                 </Button>
               ) : (
                 <Button
@@ -206,14 +206,14 @@ export function TicketDetailPage() {
                   onClick={() => setConfirming(true)}
                 >
                   <icon.delete aria-hidden="true" />
-                  Delete
+                  Eliminar
                 </Button>
               )}
             </div>
           )}
           {isOwner && !ownerCanAct && (
             <p className="text-sm text-ink-dim">
-              Once an agent takes a ticket, only they can change it.
+              Cuando un agente toma un ticket, solo él puede modificarlo.
             </p>
           )}
 
@@ -225,7 +225,7 @@ export function TicketDetailPage() {
                 onClick={() => void transition(takeTicket)}
               >
                 <icon.take aria-hidden="true" />
-                Take
+                Tomar
               </Button>
             </div>
           )}
@@ -237,7 +237,7 @@ export function TicketDetailPage() {
                 onClick={() => void transition(resolveTicket)}
               >
                 <icon.resolve aria-hidden="true" />
-                Resolve
+                Resolver
               </Button>
               <Button
                 variant="secondary"
@@ -246,13 +246,13 @@ export function TicketDetailPage() {
                 onClick={() => void transition(releaseTicket)}
               >
                 <icon.release aria-hidden="true" />
-                Release
+                Devolver a la cola
               </Button>
             </div>
           )}
           {isAgent && ticket.state === 'in_progress' && !isAssignee && (
             <p className="text-sm text-ink-dim">
-              Only the agent who took it can release or resolve it.
+              Solo el agente que lo tomó puede devolverlo o resolverlo.
             </p>
           )}
 
@@ -278,7 +278,7 @@ export function TicketDetailPage() {
 
       <div className="rounded-panel bg-surface p-6">
         <h2 className="mb-5 text-xs tracking-widest text-ink-dim uppercase">
-          History
+          Historial
         </h2>
         <Timeline history={ticket.history} categories={categories} />
 

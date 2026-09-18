@@ -33,7 +33,7 @@ export function CommentForm({ onSubmit }: Props) {
       setError(
         caught instanceof ApiError
           ? caught.message
-          : 'The comment could not be added. Try again.',
+          : 'No se pudo agregar el comentario. Intentá de nuevo.',
       );
     } finally {
       setSending(false);
@@ -43,12 +43,12 @@ export function CommentForm({ onSubmit }: Props) {
   return (
     <form onSubmit={submit} className="space-y-3">
       <label htmlFor="comment-body" className="sr-only">
-        Comment
+        Comentario
       </label>
       <Textarea
         id="comment-body"
         rows={3}
-        placeholder="Add something to the record: what you tried, what changed."
+        placeholder="Agregá algo al registro: qué probaste, qué cambió."
         value={body}
         onChange={(event) => setBody(event.target.value)}
         aria-invalid={Boolean(error)}
@@ -63,7 +63,7 @@ export function CommentForm({ onSubmit }: Props) {
       )}
       <Button type="submit" size="sm" disabled={sending || !body.trim()}>
         <icon.comment aria-hidden="true" />
-        Comment
+        Comentar
       </Button>
     </form>
   );

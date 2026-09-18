@@ -1,6 +1,7 @@
 import { ApiError } from '@/api/client';
 import type { Category } from '@/api/types';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TicketForm } from './TicketForm';
 
@@ -26,30 +27,51 @@ function renderForm(initial?: {
   );
 }
 
-function fill(values: {
+async function fill(values: {
   title?: string;
   description?: string;
   categoryId?: string;
 }) {
   if (values.title !== undefined) {
-    fireEvent.change(screen.getByLabelText('Title'), {
+    fireEvent.change(screen.getByLabelText('Título'), {
       target: { value: values.title },
     });
   }
   if (values.description !== undefined) {
-    fireEvent.change(screen.getByLabelText('Description'), {
+    fireEvent.change(screen.getByLabelText('Descripción'), {
       target: { value: values.description },
     });
   }
   if (values.categoryId !== undefined) {
-    fireEvent.change(screen.getByLabelText('Category'), {
-      target: { value: values.categoryId },
-    });
+    await pickCategory(values.categoryId);
   }
 }
 
+/** The category trigger, which shows the chosen name rather than its id. */
+function categoryField(): HTMLElement {
+  return screen.getByLabelText('Categoría');
+}
+
+/**
+ * The category is a dropdown the app draws, not a native select, so it is
+ * driven the way a person drives it: open it, then choose the option by the
+ * name on screen rather than by the id underneath. `userEvent` is required
+ * here because it sends a whole pointer sequence; a single synthetic event
+ * never opens it.
+ */
+async function pickCategory(id: string) {
+  const name = CATEGORIES.find((category) => category.id === id)?.name;
+  if (!name) {
+    throw new Error(`the test has no category with id ${id}`);
+  }
+  await userEvent.click(categoryField());
+  await userEvent.click(await screen.findByRole('option', { name }));
+}
+
 function submit() {
-  fireEvent.click(screen.getByRole('button', { name: /open ticket|save/i }));
+  fireEvent.click(
+    screen.getByRole('button', { name: /abrir ticket|guardar/i }),
+  );
 }
 
 describe('TicketForm', () => {
@@ -62,20 +84,20 @@ describe('TicketForm', () => {
 
     submit();
 
-    expect(await screen.findByText('Give the ticket a title')).toBeDefined();
-    expect(screen.getByText('Describe the problem')).toBeDefined();
-    expect(screen.getByText('The ticket needs a category')).toBeDefined();
+    expect(await screen.findByText('Ponele un título al ticket')).toBeDefined();
+    expect(screen.getByText('Describí el problema')).toBeDefined();
+    expect(screen.getByText('El ticket necesita una categoría')).toBeDefined();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('blocks a title over the limit before it reaches the API', async () => {
     renderForm();
 
-    fill({ title: 'x'.repeat(121), description: 'ok', categoryId: 'c1' });
+    await fill({ title: 'x'.repeat(121), description: 'ok', categoryId: 'c1' });
     submit();
 
     expect(
-      await screen.findByText('Keep the title under 120 characters'),
+      await screen.findByText('El título no puede pasar de 120 caracteres'),
     ).toBeDefined();
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -83,7 +105,7 @@ describe('TicketForm', () => {
   it('submits the values as typed, trimmed', async () => {
     renderForm();
 
-    fill({
+    await fill({
       title: '  Printer jammed  ',
       description: 'On floor 3',
       categoryId: 'c1',
@@ -99,10 +121,12 @@ describe('TicketForm', () => {
     );
   });
 
-  it('offers every category, used ones included', () => {
+  it('offers every category, used ones included', async () => {
     // A locked category cannot be renamed, but it can still be chosen:
     // the lock protects the audit history, not the requester's options.
     renderForm();
+
+    await userEvent.click(categoryField());
 
     const options = screen
       .getAllByRole('option')
@@ -117,7 +141,7 @@ describe('TicketForm', () => {
     );
     renderForm();
 
-    fill({
+    await fill({
       title: 'Printer jammed',
       description: 'On floor 3',
       categoryId: 'c1',
@@ -136,12 +160,12 @@ describe('TicketForm', () => {
       categoryId: 'c2',
     });
 
-    expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe(
+    expect((screen.getByLabelText('Título') as HTMLInputElement).value).toBe(
       'Printer jammed',
     );
-    expect((screen.getByLabelText('Category') as HTMLSelectElement).value).toBe(
-      'c2',
-    );
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDefined();
+    // The trigger shows the name, which is the point of resolving the id: an
+    // editor sees "Hardware", not "c2".
+    expect(categoryField().textContent).toContain('Hardware');
+    expect(screen.getByRole('button', { name: 'Guardar' })).toBeDefined();
   });
 });

@@ -34,7 +34,7 @@ export function CategoriesPage() {
       setCategories(items);
       setLoadError(null);
     } catch {
-      setLoadError('The categories could not be loaded.');
+      setLoadError('No se pudieron cargar las categorías.');
     }
   }, []);
 
@@ -66,11 +66,11 @@ export function CategoriesPage() {
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="text-2xl font-medium tracking-tight">Categories</h1>
+        <h1 className="text-2xl font-medium tracking-tight">Categorías</h1>
         <p className="mt-2 text-sm text-ink-muted">
-          Requesters pick one of these when they open a ticket. A category stops
-          being editable once a ticket has used it, so the names in an audit
-          history always mean what they meant at the time.
+          Los solicitantes eligen una de estas al abrir un ticket. Una categoría
+          deja de ser editable cuando algún ticket la usó, así los nombres del
+          historial siguen significando lo mismo que en ese momento.
         </p>
       </div>
 
@@ -84,8 +84,8 @@ export function CategoriesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-56 text-right">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead className="w-56 text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -95,7 +95,7 @@ export function CategoriesPage() {
                   <span className="text-ink">{category.name}</span>
                   {category.used && (
                     <Badge variant="secondary" className="ml-3">
-                      In use
+                      En uso
                     </Badge>
                   )}
                 </TableCell>
@@ -111,7 +111,7 @@ export function CategoriesPage() {
                     }}
                   >
                     <icon.edit aria-hidden="true" />
-                    Rename
+                    Renombrar
                   </Button>
                   {confirming === category.id ? (
                     <Button
@@ -120,7 +120,7 @@ export function CategoriesPage() {
                       onClick={() => void remove(category.id)}
                     >
                       <icon.delete aria-hidden="true" />
-                      Confirm delete
+                      Confirmar borrado
                     </Button>
                   ) : (
                     <Button
@@ -131,7 +131,7 @@ export function CategoriesPage() {
                       onClick={() => setConfirming(category.id)}
                     >
                       <icon.delete aria-hidden="true" />
-                      Delete
+                      Eliminar
                     </Button>
                   )}
                 </TableCell>

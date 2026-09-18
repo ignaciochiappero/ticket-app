@@ -52,9 +52,9 @@ describe('Timeline', () => {
       .map((item) => item.textContent);
     expect(items).toHaveLength(5);
     // Oldest first, as it happened; each entry names the person, not an id.
-    expect(items[0]).toMatch(/Lucía Fernández.*opened/);
-    expect(items[2]).toMatch(/Carla Ruiz.*took/);
-    expect(items[4]).toMatch(/Carla Ruiz.*resolved/);
+    expect(items[0]).toMatch(/Lucía Fernández.*abrió/);
+    expect(items[2]).toMatch(/Carla Ruiz.*tomó/);
+    expect(items[4]).toMatch(/Carla Ruiz.*resolvió/);
     expect(screen.queryByText(/agent-1|requester-1/)).toBe(null);
   });
 
@@ -80,7 +80,7 @@ describe('Timeline', () => {
     renderTimeline();
 
     const first = screen.getAllByRole('listitem')[0];
-    expect(first.textContent).toContain('2 days ago');
+    expect(first.textContent).toContain('hace 2 días');
     // The exact time lives in a title, so hovering answers "when, precisely?".
     expect(first.querySelector('time')?.getAttribute('title')).toMatch(/2026/);
   });
@@ -88,6 +88,6 @@ describe('Timeline', () => {
   it('says so when there is nothing yet', () => {
     renderTimeline([]);
 
-    expect(screen.getByText(/nothing has happened/i)).toBeDefined();
+    expect(screen.getByText(/todavía no pasó nada/i)).toBeDefined();
   });
 });

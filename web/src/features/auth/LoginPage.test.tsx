@@ -23,16 +23,16 @@ function renderLogin() {
 }
 
 function fillIn(username: string, password: string) {
-  fireEvent.change(screen.getByLabelText('Username'), {
+  fireEvent.change(screen.getByLabelText('Usuario'), {
     target: { value: username },
   });
-  fireEvent.change(screen.getByLabelText('Password'), {
+  fireEvent.change(screen.getByLabelText('Contraseña'), {
     target: { value: password },
   });
 }
 
 function submit() {
-  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
 }
 
 describe('LoginPage', () => {
@@ -47,8 +47,8 @@ describe('LoginPage', () => {
 
     submit();
 
-    expect(await screen.findByText('Enter your username')).toBeDefined();
-    expect(screen.getByText('Enter your password')).toBeDefined();
+    expect(await screen.findByText('Ingresá tu usuario')).toBeDefined();
+    expect(screen.getByText('Ingresá tu contraseña')).toBeDefined();
     expect(login).not.toHaveBeenCalled();
   });
 

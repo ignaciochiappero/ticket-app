@@ -7,12 +7,12 @@ export const loginSchema = z.object({
   username: z
     .string()
     .trim()
-    .min(1, 'Enter your username')
-    .max(50, 'Username is too long'),
+    .min(1, 'Ingresá tu usuario')
+    .max(50, 'El usuario es demasiado largo'),
   password: z
     .string()
-    .min(1, 'Enter your password')
-    .max(100, 'Password is too long'),
+    .min(1, 'Ingresá tu contraseña')
+    .max(100, 'La contraseña es demasiado larga'),
 });
 
 export type LoginValues = z.infer<typeof loginSchema>;
