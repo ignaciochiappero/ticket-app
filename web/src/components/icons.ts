@@ -1,5 +1,6 @@
 import {
   ChevronDown,
+  MessageSquare,
   SlidersHorizontal,
   ArrowLeft,
   Check,
@@ -47,6 +48,7 @@ export const icon = {
   drag: GripVertical,
   more: ChevronDown,
   filter: SlidersHorizontal,
+  comment: MessageSquare,
 
   // Ticket facts
   person: User,
