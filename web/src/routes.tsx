@@ -3,6 +3,7 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { CategoriesPage } from '@/features/categories/CategoriesPage';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { LandingPage } from '@/features/landing/LandingPage';
+import { TicketDetailPage } from '@/features/tickets/TicketDetailPage';
 import { TicketsPage } from '@/features/tickets/TicketsPage';
 import { Navigate, useRoutes, type RouteObject } from 'react-router';
 
@@ -19,6 +20,7 @@ const routes: RouteObject[] = [
     ),
     children: [
       { path: '/tickets', element: <TicketsPage /> },
+      { path: '/tickets/:id', element: <TicketDetailPage /> },
       {
         path: '/categories',
         element: (

@@ -142,7 +142,7 @@ New code on its own branch, delivered in one PR; no existing behavior or data ch
 
 ## Decisions from the question round (confirmed by the user)
 
-1. **Agent board**: agents see one board with every ticket, active states by default, each ticket showing its state and assignee. Grouping by state was replaced by the state filter and sorting, which cannot both hold: a list sorted by date is not grouped.
+1. **Agent board**: agents see one board with every ticket, active states by default. It is laid out the way Jira lays out a board: one column per state, cards inside sorted by the chosen order. Columns give the grouping, the sort gives the order within each, and the state filter decides which columns have anything in them.
 2. **Ageing**: with no dashboard there are no medians. The question "what has been waiting longest" is answered by sorting oldest first with the active states selected, which is the actionable half of it.
 3. **Released tickets**: a released ticket is `open` again, so its requester may edit or delete it, even if it has comments.
 4. **Starter categories**: Access, Hardware, Software and Other are seeded and editable until used; category names are unique.
