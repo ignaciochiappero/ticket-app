@@ -110,6 +110,14 @@ If a skill conflicts with this file, this file wins.
 
 ## Project context
 
+[`DECISIONS.md`](DECISIONS.md) is the reasoning behind the shape of this
+repository: the data model and why the history is embedded, the state machine,
+what was built instead of what, how environment variables are read (the API
+ignores `.env` files, the web inlines them at build time), how to add a feature
+without fighting the conventions, what breaks at scale, the debt taken on
+knowingly, and what is and is not tested. Read it before proposing a structural
+change, and update it in the same commit when one lands.
+
 `.agents/context/` stores project knowledge: domain, decisions and data model.
 
 Keep this file and `.agents/context/` in sync with the repository. When a change affects the stack, structure, commands, data model or conventions, update them in the same commit.

@@ -123,14 +123,24 @@ AGENTS.md      the rules the AI follows in this repository
 
 Everything has a working default, so the commands above need no configuration.
 
-| Variable      | Default                             | Used by    |
-| ------------- | ----------------------------------- | ---------- |
-| `MONGODB_URI` | `mongodb://localhost:27017/tickets` | API        |
-| `PORT`        | `3000`                              | API        |
-| `WEB_ORIGIN`  | `http://localhost:5173`             | API (CORS) |
-| `JWT_SECRET`  | a random secret per start           | API        |
+| Variable       | Default                             | Used by    |
+| -------------- | ----------------------------------- | ---------- |
+| `MONGODB_URI`  | `mongodb://localhost:27017/tickets` | API        |
+| `PORT`         | `3000`                              | API        |
+| `WEB_ORIGIN`   | `http://localhost:5173`             | API (CORS) |
+| `JWT_SECRET`   | a random secret per start           | API        |
+| `VITE_API_URL` | `http://localhost:3000`             | web        |
 
 Without `JWT_SECRET` the API logs a warning and signs tokens with a random secret, which means a restart invalidates them. Set it to keep sessions across restarts.
+
+Two things to know before overriding any of these. The API reads `process.env`
+directly, so a `.env` file in `api/` does nothing: set the variables in the
+shell that starts it. The web is the opposite — Vite reads `web/.env.local` on
+its own, but bakes `VITE_API_URL` into the bundle at build time, so changing it
+means rebuilding rather than restarting.
+
+[`DECISIONS.md`](DECISIONS.md#4-environment-and-running-it-your-way) has the
+recipes, including running against MongoDB Atlas with no Docker.
 
 ## Status
 
